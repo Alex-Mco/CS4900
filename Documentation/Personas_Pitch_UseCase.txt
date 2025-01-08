@@ -1,8 +1,8 @@
-﻿###Project Elevator pitch:
+Project Elevator pitch:
         Marvel Nexus is a web application for Marvel comic enthusiasts to explore characters and manage their comic collections. It offers detailed character profiles, a comic library with personalized recommendations, and a user-friendly interface for browsing and tracking favorites. All you need in one application for any comic fan.
 
-###Personas: 
-##Persona 1: Luke
+Personas: 
+Persona 1: Luke
 Name: Luke
 Gender: Male
 Age: 20
@@ -22,7 +22,7 @@ Frustrations:
 * Finds it hard to remember which comics he has already read or wants to read.
 * Wishes there was a single platform to explore Marvel characters and comics without needing multiple apps or websites.
 
-##Persona 2: Sam
+Persona 2: Sam
 Name: Sam
 Gender: Male
 Age: 40
@@ -42,8 +42,8 @@ Frustrations:
 * Struggles to discover related series without manually searching through extensive lists.
 * Wishes there was a tool to help him visualize and manage his collection more effectively.
 
-###Use Cases: 
-#1. Explore Characters
+Use Cases: 
+1. Explore Characters
 * Actor: User
 * Goal: Search for characters and view their details.
 * Steps:
@@ -52,7 +52,8 @@ Frustrations:
    3. System displays a list of characters matching the query.
    4. User selects a character from the list.
    5. System fetches and displays the character's detailed profile, including name, description, image, and affiliations.
-#2. Explore Comics
+
+2. Explore Comics
    6. Actor: User
    7. Goal: Search for comics and view their details.
    8. Steps:
@@ -61,7 +62,8 @@ Frustrations:
       * System displays a list of comics matching the query.
       * User selects a comic from the list.
       * System fetches and displays the comic's detailed profile, including title, issue number, creators, and release date.
-#3. Save Comics
+
+3. Save Comics
 * Actor: User
 * Goal: Add a comic to the favorites list.
 * Steps:
@@ -69,7 +71,8 @@ Frustrations:
    2. User selects a comic to save.
    3. System saves the comic to the user’s database record.
    4. User views the comic in their "Favorites" section.
-#4. Save Characters
+
+4. Save Characters
 * Actor: User
 * Goal: Add a character to the favorites list.
 * Steps:
@@ -77,7 +80,8 @@ Frustrations:
    2. User selects a character to save.
    3. System saves the character to the user’s database record.
    4. User views the character in their "Favorites" section.
-#5. Create User
+
+5. Create User
 * Actor: User
 * Goal: Register a new account.
 * Steps:
@@ -86,7 +90,8 @@ Frustrations:
    3. System validates the input and hashes the password.
    4. System saves the user details in the database.
    5. User receives a confirmation message and can log in.
-#6. Log In
+
+6. Log In
 * Actor: User
 * Goal: Authenticate and access the application.
 * Steps:
@@ -94,7 +99,8 @@ Frustrations:
    2. User enters email and password.
    3. System validates credentials using OAuth2.
    4. User is authenticated and redirected to the dashboard.
-#7. Create Collection
+
+7. Create Collection
 * Actor: User
 * Goal: Create a new collection for comics or characters.
 * Steps:
@@ -103,7 +109,8 @@ Frustrations:
    3. User enters a collection name and optional description.
    4. System saves the collection to the database.
    5. User sees the new collection in their list.
-#8. Add to Collection
+
+8. Add to Collection
 * Actor: User
 * Goal: Add a comic or character to a specific collection.
 * Steps:
@@ -111,7 +118,8 @@ Frustrations:
    2. User chooses a collection to add the item to.
    3. System updates the collection in the database.
    4. User views the updated collection.
-#9. View Collections
+
+9. View Collections
 * Actor: User
 * Goal: Browse existing collections and their contents.
 * Steps:
@@ -119,7 +127,8 @@ Frustrations:
    2. System fetches and displays all user collections.
    3. User selects a collection to view its contents.
    4. System displays the items (comics or characters) in the collection.
-#10. Remove from Favorites or Collections
+
+10. Remove from Favorites or Collections
 * Actor: User
 * Goal: Remove a comic or character from favorites or a collection.
 * Steps:
@@ -127,7 +136,8 @@ Frustrations:
    2. User selects an item to remove.
    3. System removes the item from the database.
    4. User no longer sees the item in the list.
-#11. Update User Account
+
+11. Update User Account
 * Actor: User
 * Goal: Update account settings like email, password, etc.
 * Steps:
@@ -135,7 +145,8 @@ Frustrations:
    2. User updates account information.
    3. System saves information in the database.
    4. User sees the updated information applied.
-#12. Log Out
+
+12. Log Out
 * Actor: User
 * Goal: End the session and log out.
 * Steps:
