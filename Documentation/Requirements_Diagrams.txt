@@ -12,10 +12,12 @@ Non-Functional Requirements:
 2. Scalability: Handle a growing database of characters and comics.
 3. Usability: Intuitive UI with responsive design.
 4. Security: Secure user authentication and data storage.
+
 Low-fidelity, Non-interactive, Mobile-First, Responsive GUI design/mockup (using figma): 
         Figma Link: https://www.figma.com/design/A85U9xDvjrntzoF4rn1IvB/Capstone?node-id=0-1&t=0bT4mYa8d1hwhFPY-1 
+
 Database Diagrams: 
-One database for comics and characters: {
+one collection for comics and characters: {
   "characters": [
     {
       "id": "1009368",
@@ -35,7 +37,7 @@ One database for comics and characters: {
     }
   ]
 }
-And another database for users: 
+A different collection for users
 {
   "_id": "user123",
   "name": "Emily",
@@ -69,7 +71,6 @@ And another database for users:
   ]
 }
 
-
 Json web service input and output for each RESTful endpoint: 
 1. GET /characters?name=Iron+Man
 Input:
@@ -97,6 +98,7 @@ json
 {
   "message": "Comic saved successfully."
 }
+
 Architectural Stack:
 Frontend: React, TailwindCSS.
 Backend: Node.js
