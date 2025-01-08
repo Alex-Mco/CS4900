@@ -1,0 +1,10 @@
+﻿Testing Plan: 
+Unit Testing: Test individual components (e.g., search bar, API calls).
+Performance Testing: Measure response times for API calls.
+User Acceptance Test Plan: 
+Scenario: User searches for "Spider-Man."
+Expected Result: Character profile displays with correct details.
+Scenario: User adds a comic to favorites.
+Expected Result: Comic appears in the user's favorites list.
+Scenario: User creates a collection and adds a comic to it.
+        Expected Result: Collection is created and comic is added to said collection.
