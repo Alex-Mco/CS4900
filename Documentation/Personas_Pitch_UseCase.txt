@@ -43,113 +43,37 @@ Frustrations:
 * Wishes there was a tool to help him visualize and manage his collection more effectively.
 
 Use Cases: 
-1. Explore Characters
-* Actor: User
-* Goal: Search for characters and view their details.
-* Steps:
-   1. User enters a search query (e.g., character name).
-   2. System fetches matching data from the Marvel API.
-   3. System displays a list of characters matching the query.
-   4. User selects a character from the list.
-   5. System fetches and displays the character's detailed profile, including name, description, image, and affiliations.
+Use Case 1: Set up the database and web server.
+        User Story: As a developer, I want to install and configure the database and document the setup in the README.md file.
+Use Case 2: Initialize database
+        User Story: As a developer, I want the web service to initialize the database schema, collections, and any required sample data on startup.
+Use Case 3: Create User
+        User Story: As a user, I want to register a new account so I can start using the application.
+        User Story: As a developer, I want to implement input validation and password hashing for secure user registration.
+Use Case 4: Log In
+        User Story: As a user, I want to log in to access my account using OAuth2.
+Use Case 5: Save Comics
+        User Story: As a user, I want to add a comic to my favorites so I can access it later.
+Use Case 6: Save Characters
+        User Story: As a user, I want to add a character to my favorites so I can access it later.
+Use Case 7: Explore Characters
+        User Story: As a user, I want to search for characters using the Marvel API and view a list of matching results. I want to view detailed profiles of characters, including their name, description, image, and affiliations.
+Use Case 8: Explore Comics
+        User Story: As a user, I want to search for comics using the Marvel API and view a list of matching results. I want to view detailed profiles of comics, including their title, issue number, creators, and release date.
+Use Case 9: Create Collection
+        User Story: As a user, I want to create a new collection for comics or characters, with a name and optional description.
+Use Case 10: Add to Collection
+        User Story: As a user, I want to add a comic or character to a specific collection.
+Use Case 11: View Collections
+        User Story: As a user, I want to browse my existing collections and view their contents.
+Use Case 12: Remove from Favorites or Collections
+        User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
+Use Case 13: Update User Account
+        User Story: As a user, I want to update my account settings, such as email or password.
+Use Case 14: Log Out
+        User Story: As a user, I want to log out of my account to end my session securely.
+Use Case 15: Explore Dashboard
+        User Story: As a user, I want to access and explre the dashboard to view a overview of my activity and saved items
+Use Case 16: View recommended Comics
+        User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
 
-2. Explore Comics
-   6. Actor: User
-   7. Goal: Search for comics and view their details.
-   8. Steps:
-      * User enters a search query (e.g., comic title or issue number).
-      * System fetches matching data from the Marvel API.
-      * System displays a list of comics matching the query.
-      * User selects a comic from the list.
-      * System fetches and displays the comic's detailed profile, including title, issue number, creators, and release date.
-
-3. Save Comics
-* Actor: User
-* Goal: Add a comic to the favorites list.
-* Steps:
-   1. User browses or searches for comics.
-   2. User selects a comic to save.
-   3. System saves the comic to the user’s database record.
-   4. User views the comic in their "Favorites" section.
-
-4. Save Characters
-* Actor: User
-* Goal: Add a character to the favorites list.
-* Steps:
-   1. User browses or searches for characters.
-   2. User selects a character to save.
-   3. System saves the character to the user’s database record.
-   4. User views the character in their "Favorites" section.
-
-5. Create User
-* Actor: User
-* Goal: Register a new account.
-* Steps:
-   1. User navigates to the registration page.
-   2. User enters required details (name, email, password).
-   3. System validates the input and hashes the password.
-   4. System saves the user details in the database.
-   5. User receives a confirmation message and can log in.
-
-6. Log In
-* Actor: User
-* Goal: Authenticate and access the application.
-* Steps:
-   1. User navigates to the login page.
-   2. User enters email and password.
-   3. System validates credentials using OAuth2.
-   4. User is authenticated and redirected to the dashboard.
-
-7. Create Collection
-* Actor: User
-* Goal: Create a new collection for comics or characters.
-* Steps:
-   1. User navigates to the "Collections" section.
-   2. User clicks on "Create Collection."
-   3. User enters a collection name and optional description.
-   4. System saves the collection to the database.
-   5. User sees the new collection in their list.
-
-8. Add to Collection
-* Actor: User
-* Goal: Add a comic or character to a specific collection.
-* Steps:
-   1. User selects a comic or character.
-   2. User chooses a collection to add the item to.
-   3. System updates the collection in the database.
-   4. User views the updated collection.
-
-9. View Collections
-* Actor: User
-* Goal: Browse existing collections and their contents.
-* Steps:
-   1. User navigates to the "Collections" section.
-   2. System fetches and displays all user collections.
-   3. User selects a collection to view its contents.
-   4. System displays the items (comics or characters) in the collection.
-
-10. Remove from Favorites or Collections
-* Actor: User
-* Goal: Remove a comic or character from favorites or a collection.
-* Steps:
-   1. User navigates to the "Favorites" or "Collections" section.
-   2. User selects an item to remove.
-   3. System removes the item from the database.
-   4. User no longer sees the item in the list.
-
-11. Update User Account
-* Actor: User
-* Goal: Update account settings like email, password, etc.
-* Steps:
-   1. User navigates to the "Settings" page.
-   2. User updates account information.
-   3. System saves information in the database.
-   4. User sees the updated information applied.
-
-12. Log Out
-* Actor: User
-* Goal: End the session and log out.
-* Steps:
-   1. User clicks the "Log Out" button.
-   2. System invalidates the user session.
-   3. User is redirected to the login page.
