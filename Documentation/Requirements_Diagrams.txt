@@ -105,4 +105,4 @@ Backend: Node.js
 Database: MongoDB for user, comic, and character data
 API Integration: Marvel API (free to use with an account)
 Authentication: OAuth 2.0 for user authentication.
-Hosting: Vercel (frontend), AWS (backend).
+Hosting: AWS frontend and backend.
