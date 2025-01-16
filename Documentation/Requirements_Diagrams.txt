@@ -100,7 +100,7 @@ json
 }
 
 Architectural Stack:
-Frontend: React, TailwindCSS.
+Frontend: React, TailwindCSS (on top of regular css).
 Backend: Node.js
 Database: MongoDB for user, comic, and character data
 API Integration: Marvel API (free to use with an account)
