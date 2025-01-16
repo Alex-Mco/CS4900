@@ -1,0 +1,113 @@
+﻿Testing Plan: 
+
+Model Layer: Jest (JavaScript)
+        Test default constructor to ensure the default values are correctly initialized and that no exceptions are thrown
+        Test the buisness logic for things like filtering characters by name and filtering comics by title. (making sure it works for exact matches, partial matches and does not care about capitlization) 
+        Test edge cases like empty/null/invalid. as well as the smallest values where lists only have one entry, and large values wehre their is thousands. 
+Controller Layer: Sinon (JavaScript)
+        Mock an API response from Marvel API to do invalid and valid requests. make sure that both good and bad responses are handled 
+        Test for combining more than one API call. 
+Database Layer: Jest with mock DB calls (JavaScript)
+        Mock database and simulate interactions like adding, deleting, and updating.
+        Test things like saving comics and characters to user favorites 
+        Test edge cases. 
+View Layer: React Testing Library (for React apps)
+        Test that all UI elements work appropriatly (buttons, inputs, searches etc.)
+        Test edge cases for empty and large things like search collections and favorites. 
+        Test for accessibility of design
+
+User Acceptance Test Plan: 
+Use Case Test 1: Create User
+        User Story: As a user, I want to register a new account so I can start using the application.
+        
+        Navigate to the registration page.
+        Enter valid details (username, email, password) and submit the form.
+        Verify that the account is created successfully and a confirmation message is displayed.
+        User Story: As a developer, I want to implement input validation and password hashing for secure user registration.
+        
+        Attempt to register with invalid inputs (e.g., weak password, invalid email).
+        Verify that the system prevents registration and displays appropriate error messages.
+        Confirm that passwords are stored securely using hashing.
+Use Case Test 2: Log In
+        User Story: As a user, I want to log in to access my account using OAuth2.
+        
+        Navigate to the login page.
+        Enter valid credentials and log in.
+        Verify that the user is redirected to their dashboard.
+        Attempt to log in with invalid credentials and confirm that access is denied with an error message.
+Use Case Test 3: Save Comics
+        User Story: As a user, I want to add a comic to my favorites so I can access it later.
+        
+        Search for a comic and view its details.
+        Click "Add to Favorites."
+        Navigate to the "Favorites" section and confirm the comic is listed.
+Use Case Test 4: Save Characters
+        User Story: As a user, I want to add a character to my favorites so I can access it later.
+        
+        Search for a character and view its details.
+        Click "Add to Favorites."
+        Navigate to the "Favorites" section and confirm the character is listed.
+Use Case Test 5: Explore Characters
+        User Story: As a user, I want to search for characters using the Marvel API and view a list of matching results.
+        
+        Navigate to the "Characters" page.
+        Enter a character name in the search bar.
+        Verify that the system displays a list of matching characters.
+        User Story: I want to view detailed profiles of characters, including their name, description, image, and affiliations.
+        
+        Select a character from the list.
+        Confirm that the detailed profile includes all specified information.
+Use Case Test 6: Explore Comics
+        User Story: As a user, I want to search for comics using the Marvel API and view a list of matching results.
+        
+        Navigate to the "Comics" page.
+        Enter a comic title in the search bar.
+        Verify that the system displays a list of matching comics.
+        User Story: I want to view detailed profiles of comics, including their title, issue number, creators, and release date.
+        
+        Select a comic from the list.
+        Confirm that the detailed profile includes all specified information.
+Use Case Test 7: Create Collection
+        User Story: As a user, I want to create a new collection for comics or characters, with a name and optional description.
+        
+        Navigate to the "Collections" page.
+        Click "Create Collection" and enter a name and description.
+        Verify that the new collection appears in the list.
+Use Case Test 8: Add to Collection
+        User Story: As a user, I want to add a comic or character to a specific collection.
+        
+        Select a comic or character and choose "Add to Collection."
+        Select a collection from the list and confirm the item is added.
+Use Case Test 9: View Collections
+        User Story: As a user, I want to browse my existing collections and view their contents.
+        
+        Navigate to the "Collections" page.
+        Select a collection and verify that its contents are displayed.
+Use Case Test 10: Remove from Favorites or Collections
+        User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
+        
+        Navigate to the "Favorites" or "Collections" page.
+        Select an item and click "Remove."
+        Verify that the item is removed from the list.
+Use Case Test 11: Update User Account
+        User Story: As a user, I want to update my account settings, such as email or password.
+        
+        Navigate to the "Account Settings" page.
+        Update the email or password and save changes.
+        Verify that the changes are reflected.
+Use Case Test 12: Log Out
+        User Story: As a user, I want to log out of my account to end my session securely.
+        
+        Click the "Log Out" button.
+        Verify that the system redirects to the login page and ends the session.
+        Attempt to access a protected page and confirm that access is denied.
+Use Case Test 13: Explore Dashboard
+        User Story: As a user, I want to access and explore the dashboard to view an overview of my activity and saved items.
+        
+        Log in and navigate to the dashboard.
+        Verify that the dashboard displays an overview of activity and saved items.
+Use Case Test 14: View Recommended Comics
+        User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
+        
+        Log in and navigate to the recommendations section.
+        Verify that the system displays personalized comic recommendations.

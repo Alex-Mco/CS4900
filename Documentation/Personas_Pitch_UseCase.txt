@@ -1,0 +1,79 @@
+Project Elevator pitch:
+        Marvel Nexus is a web application for Marvel comic enthusiasts to explore characters and manage their comic collections. It offers detailed character profiles, a comic library with personalized recommendations, and a user-friendly interface for browsing and tracking favorites. All you need in one application for any comic fan.
+
+Personas: 
+Persona 1: Luke
+Name: Luke
+Gender: Male
+Age: 20
+Occupation: Full-time college student
+About:
+Luke is a Marvel fan who enjoys both the comics and movies. He loves diving into the backstories of characters and often uses this knowledge to impress friends. As a student, his schedule is packed with classes, assignments, and extracurricular activities, leaving little time for hobbies. He uses his downtime to explore Marvel lore and unwind.
+Goals:
+* Discover lesser-known Marvel characters and their story arcs.
+* Keep track of comics he wants to read during breaks.
+* Share interesting Marvel facts with friends.
+Needs:
+* A user-friendly app to quickly search for characters and comics.
+* A way to save favorite characters and comics to revisit later.
+* Personalized recommendations to explore new comics during free time.
+Frustrations:
+* Feels overwhelmed by the vast amount of Marvel content available.
+* Finds it hard to remember which comics he has already read or wants to read.
+* Wishes there was a single platform to explore Marvel characters and comics without needing multiple apps or websites.
+
+Persona 2: Sam
+Name: Sam
+Gender: Male
+Age: 40
+Occupation: Accountant
+About:
+Sam is a lifelong Marvel fan and an avid comic book collector. His collection includes both physical and digital comics, ranging from classic issues to modern storylines. He takes pride in organizing and cataloging his collection but often struggles to keep track of what he owns and what he still needs to complete certain series. Sam enjoys discovering related series and characters to expand his collection.
+Goals:
+* Organize and catalog his comic collection efficiently.
+* Discover new comics and series that align with his interests.
+* Complete missing issues in his favorite story arcs or series.
+Needs:
+* A robust app to track his physical and digital comic inventory.
+* Recommendations for comics related to his existing collection.
+* A search feature to quickly find details about specific comics or series.
+Frustrations:
+* Finds it challenging to keep track of comics he owns versus ones he still needs.
+* Struggles to discover related series without manually searching through extensive lists.
+* Wishes there was a tool to help him visualize and manage his collection more effectively.
+
+Use Cases: 
+Use Case 1: Set up the database and web server.
+        User Story: As a developer, I want to install and configure the database and document the setup in the README.md file.
+Use Case 2: Initialize database
+        User Story: As a developer, I want the web service to initialize the database schema, collections, and any required sample data on startup.
+Use Case 3: Create User
+        User Story: As a user, I want to register a new account so I can start using the application.
+        User Story: As a developer, I want to implement input validation and password hashing for secure user registration.
+Use Case 4: Log In
+        User Story: As a user, I want to log in to access my account using OAuth2.
+Use Case 5: Save Comics
+        User Story: As a user, I want to add a comic to my favorites so I can access it later.
+Use Case 6: Save Characters
+        User Story: As a user, I want to add a character to my favorites so I can access it later.
+Use Case 7: Explore Characters
+        User Story: As a user, I want to search for characters using the Marvel API and view a list of matching results. I want to view detailed profiles of characters, including their name, description, image, and affiliations.
+Use Case 8: Explore Comics
+        User Story: As a user, I want to search for comics using the Marvel API and view a list of matching results. I want to view detailed profiles of comics, including their title, issue number, creators, and release date.
+Use Case 9: Create Collection
+        User Story: As a user, I want to create a new collection for comics or characters, with a name and optional description.
+Use Case 10: Add to Collection
+        User Story: As a user, I want to add a comic or character to a specific collection.
+Use Case 11: View Collections
+        User Story: As a user, I want to browse my existing collections and view their contents.
+Use Case 12: Remove from Favorites or Collections
+        User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
+Use Case 13: Update User Account
+        User Story: As a user, I want to update my account settings, such as email or password.
+Use Case 14: Log Out
+        User Story: As a user, I want to log out of my account to end my session securely.
+Use Case 15: Explore Dashboard
+        User Story: As a user, I want to access and explre the dashboard to view a overview of my activity and saved items
+Use Case 16: View recommended Comics
+        User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
+
