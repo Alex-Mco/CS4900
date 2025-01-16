@@ -1,0 +1,5 @@
+their black: #151515
+their grey: #202020
+their white: #fff
+their red: #e62429
+their gold: #c6a972
