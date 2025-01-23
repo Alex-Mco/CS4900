@@ -1,29 +1,63 @@
-import React from 'react';
-import { Link } from 'react-router-dom';  // Import Link from react-router-dom
-import './collection_gallery.css';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import './collection_gallery.css'; 
 
-const CollectionGallery = () => {
-  const collections = [
-    { id: 1, name: 'Collection 1', description: 'Description of collection 1' },
-    { id: 2, name: 'Collection 2', description: 'Description of collection 2' },
-    { id: 3, name: 'Collection 3', description: 'Description of collection 3' },
-  ];
+function CollectionGallery() {
+  const [user, setUser] = useState(null);
+  const [newCollectionName, setNewCollectionName] = useState('');
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/profile', { withCredentials: true })
+      .then(response => setUser(response.data))
+      .catch(error => console.error('Error fetching user:', error));
+  }, []);
+
+  const handleAddCollection = () => {
+    if (newCollectionName && user) {
+      axios.post(`http://localhost:5000/users/${user._id}/collections`, { collectionName: newCollectionName })
+        .then(response => {
+          setUser(response.data);
+          setNewCollectionName(''); 
+        })
+        .catch(error => console.error('Error adding collection:', error));
+    }
+  };
 
   return (
-    <div className="collections-page">
-      <h1 className="page-title">Collections</h1>
-      <div className="collections-grid">
-        {collections.map((collection) => (
-          <Link to={`/collection/${collection.id}`} key={collection.id} className="collection-card-link">
-            <div className="collection-card">
-              <h2 className="collection-title">{collection.name}</h2>
-              <p className="collection-description">{collection.description}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
+    <div>
+      <h1>Collections</h1>
+      {user ? (
+        <div className='collection-container'>
+          <div className="title-entry">
+            <input
+              type="text"
+              value={newCollectionName}
+              onChange={(e) => setNewCollectionName(e.target.value)}
+              placeholder="Enter title for new collection"
+            />
+            <button onClick={handleAddCollection}>Add Collection</button>
+          </div>
+
+          <div className="collection-cards">
+            {user.collections.map((collection) => (
+              <Link
+                key={collection._id}
+                to={`/collection/${collection._id}`}
+                className="collection-card"
+              >
+                <div className="card-content">
+                  <h3>{collection.collectionName}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
-};
+}
 
 export default CollectionGallery;

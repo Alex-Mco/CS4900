@@ -1,45 +1,21 @@
-import { useState } from 'react';
+import React from "react";
+import "./login.css";
 
-function Login({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Add basic validation or authentication logic here
-    if (email && password) {
-      onLogin(); // Call the onLogin callback to update the login state
-    } else {
-      alert('Please enter both email and password.');
-    }
+function Login() {
+  // Redirect to the Google OAuth route
+  const login = () => {
+    window.location.href = "http://localhost:5000/auth/google"; // have to update the once AWS is up
   };
 
   return (
     <div>
       <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-          />
-        </div>
-        <button type="submit">Log In</button>
-      </form>
+      <p>Please log in using your Google account:</p>
+      <div className="googleLogIn">
+        <button onClick={login} className="login-button">
+          Log in with Google
+        </button>
+      </div>
     </div>
   );
 }

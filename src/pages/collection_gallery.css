@@ -1,52 +1,102 @@
-
-.collections-page {
-  background-color: #fff; 
-  color: #151515; 
-  padding: 20px;
-  font-family: Arial, sans-serif;  
+#root{
+  width: 100vw;
+  overflow-x: hidden;
 }
-
-.page-title {
-  font-size: 2rem;
-  color: #e62429; 
-  text-align: center;
-  margin-bottom: 20px;
+.collection-container{
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
 }
-
-.collections-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+.collection-cards {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center;
   gap: 20px;
-}
-
-.collection-card-link {
-  text-decoration: none;
+  width: 100%;
+  padding: 20px;
+  justify-content: flex-start; 
 }
 
 .collection-card {
   background-color: #202020;
-  color: #fff;
-  border: 2px solid #c6a972;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  border: 5px solid #e62429;
+  border-radius: 12px;
+  padding: 20px;
+  margin:20px;
+  width: 100%; 
+  max-width: 280px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  cursor: pointer;
 }
 
 .collection-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px); 
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+  border-color: #c6a972; 
 }
 
-
-.collection-title {
-  font-size: 1.5rem;
+.collection-card h3 {
+  font-size: 1.2rem;
   margin-bottom: 10px;
-  color: #e62429; 
+  color: #fff;
+  font-weight: bold;
+  transition: color 0.3s ease;
 }
 
-.collection-description {
+.collection-card:hover h3 {
+  color: #e62429;
+}
+
+.title-entry {
+  display: flex;
+  justify-content: center;
+  width: 50%;
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 5px;
+}
+
+.title-entry input {
+  padding: 10px;
+  margin-right: 10px;
+  background-color: #fff;
+  border: 1px solid #c6a972;
+  border-radius: 5px;
   font-size: 1rem;
-  color: #c6a972; 
+  width: 70%;
+  color: #151515;
+}
+
+.title-entry button {
+  padding: 10px 20px;
+  background-color: #e62429;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.title-entry button:hover {
+  background-color: #c6a972; 
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #e62429;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #c6a972; 
 }
 

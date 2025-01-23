@@ -1,0 +1,66 @@
+#root{
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  margin-bottom: 20px;
+}
+
+.header-container button {
+  margin: 50px; 
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #e62429;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.header-container button:hover {
+  background-color: #c6a972; 
+}
+
+.collection-title {
+  margin: 0;
+  text-align: center;
+}
+.add-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  margin-bottom: 20px
+}
+
+.comics-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+.comic-card {
+  background-color: #202020;
+  border: 2px solid #c6a972;
+  border-radius: 8px;
+  padding: 15px;
+  width: 100%;
+  max-width: 300px;
+  max-height: 300px;
+  text-align: center;
+  color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow-y:scroll;
+}
+.comic-card h3{
+  color: #e62429;
+}
+.comic-card p{
+  color: #c6a972;
+}
