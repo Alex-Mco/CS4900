@@ -95,8 +95,7 @@ function ExplorePage() {
   const handleConfirmSelection = async () => {
     if (selectedCollection && selectedComic && user) {
       console.log(selectedComic.id)
-      const comicData = {
-        id: selectedComic.id, 
+      const comicData = { 
         title: selectedComic.title, 
         thumbnail: {
           path: selectedComic.thumbnail.path,

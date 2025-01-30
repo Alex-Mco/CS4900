@@ -8,9 +8,9 @@ const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
 require('dotenv').config();
 require('./passport');
-const usersRoutes = require('./database/routes/users');
+const usersRoutes = require('./database/routes/userRoutes');
 const User = require('./database/models/user');
-const comicRoutes = require('./database/routes/comic');
+const comicRoutes = require('./database/routes/comicRoutes');
 
 const app = express();
 
@@ -69,7 +69,7 @@ app.get('/logout', (req, res) => {
 });
 
 //profile routes and code
-app.use('/users', usersRoutes);
+app.use('/api/users', usersRoutes);
 
 app.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
@@ -165,5 +165,13 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(5000, () => {
+    console.log('Server running on port 5000');
+  });
+}
+
+
+module.exports = app;  // Export the app for testing

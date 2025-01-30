@@ -29,9 +29,6 @@ const comicSchema = new mongoose.Schema({
       type: String,
     }
   },
-  id:{
-    type: String, 
-  },
   series:{
     type: String,
   },

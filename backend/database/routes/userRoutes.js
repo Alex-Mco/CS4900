@@ -8,8 +8,6 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { googleId, name, email, profilePic } = req.body;
-    console.log(req.body);
-
     const existingUser = await User.findOne({ googleId: googleId });
     if (existingUser) {
       return res.status(400).json({ msg: 'User already exists' });
@@ -22,8 +20,8 @@ router.post('/register', async (req, res) => {
       profilePic,
       collections: [],
     });
-    await newUser.save();
-    res.status(201).json(newUser);
+    const savedUser = await newUser.save();
+    res.status(201).json(savedUser);
 
   } catch (err) {
     console.error(err.message);
@@ -32,7 +30,7 @@ router.post('/register', async (req, res) => {
 });
 
 //update user information
-router.put('/users/:googleId', async (req, res) => {
+router.put('/update/:googleId', async (req, res) => {
   try {
     const { name, email, username } = req.body;
     let profilePic = req.file ? req.file.path : null; // If using multer for file uploads
@@ -99,7 +97,6 @@ router.post('/:userId/collections', async (req, res) => {
 router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
   try {
     const { title, issueNumber, authors, description, series } = req.body;
-
     // Create a new comic
     const newComic = new Comic({
       title,
@@ -108,22 +105,22 @@ router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
       description,
       series,
     });
-    await newComic.save();
-
+    const savedComic = await newComic.save();
     // Find the user and collection
     const user = await User.findById(req.params.userId);
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    const collection = user.collections.id(req.params.collectionId);
+    const collection = user.collections.find(col => col._id.toString() === req.params.collectionId);
     if (!collection) {
       return res.status(404).json({ msg: 'Collection not found' });
     }
 
     // Add the comic to the collection
-    collection.comics.push(newComic._id);
+    collection.comics.push(savedComic._id);
     await user.save();
+
     res.json(collection);
   } catch (err) {
     console.error(err.message);
