@@ -1,16 +1,17 @@
+
 const md5 = require('md5');
 const express = require('express');
 const axios = require("axios");
 const cors = require("cors");
-const passport = require('passport');
+const passport = require('./passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
+const { connectDatabase } = require('./db');
 require('dotenv').config();
-require('./passport');
-const usersRoutes = require('./database/routes/userRoutes');
-const User = require('./database/models/user');
-const comicRoutes = require('./database/routes/comicRoutes');
+const usersRoutes = require('./routes/userRoutes');
+const User = require('./models/user');
+const testRoutes = require('./routes/testRoute')
 
 const app = express();
 
@@ -21,30 +22,26 @@ app.use(cors({
 }));
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-const multer = require('multer'); //for form data file uploads/updates
+
+// File upload setup
+const multer = require('multer'); // For form data file uploads/updates
 const upload = multer({ dest: 'uploads/' }); // Temporary storage location for uploaded files
-
-
-// Connect to MongoDB Atlas
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Atlas connected'))
-.catch((err) => console.error('MongoDB connection error:', err));
 
 // Session setup with MongoDB Atlas store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'defaultsecret',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URL, 
-      collectionName: 'sessions', 
+      mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/testdb', // Ensure fallback value
+      collectionName: 'sessions',
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
-    cookie: { secure: process.env.NODE_ENV === 'production' }, 
+    cookie: {
+      secure: false, // Ensure secure is false in testing environments
+      httpOnly: true,
+    },
   })
 );
 
@@ -52,126 +49,142 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Google OAuth routes
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// Connect to the database before starting the server
+connectDatabase()
+  .then(() => {
+    // Google OAuth routes
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-app.get(
-  '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('http://localhost:5173/profile');
-  }
-);
-
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-//profile routes and code
-app.use('/api/users', usersRoutes);
-
-app.get('/profile', (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect('/login'); 
-  }
-  res.json(req.user); 
-});
-
-app.put('/update-profile', upload.single('profilePic'), async (req, res) => {
-  const { name, email, username } = req.body;
-  const profilePic = req.file ? req.file.path : null; // Get the file path if uploaded
-
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'User not authenticated' });
-  }
-
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { googleId: req.user.googleId },
-      { name, email, username, profilePic },
-      { new: true }
+    app.get(
+      '/auth/google/callback',
+      passport.authenticate('google', { failureRedirect: '/' }),
+      (req, res) => {
+        res.redirect('http://localhost:5173/profile');
+      }
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    app.get('/logout', (req, res, next) => {
+      req.logout((err) => {
+        if (err) {
+          return next(err);
+        }
+        req.session.destroy(() => {
+          res.redirect('/');
+        });
+      });
+    });
+    
+    //Test routes
+    app.use('/auth/test', testRoutes);
+    // Profile routes and code
+    app.use('/api/users', usersRoutes);
 
-    res.json(updatedUser); // Send back the updated user data
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
-  }
-});
-
-//Collection management code
-//get collection details
-app.get('/collections/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const user = await User.findOne({ 'collections._id': id }).populate('collections.comics');
-    if (!user) {
-      return res.status(404).json({ error: 'Collection not found' });
-    }
-    const collection = user.collections.find((col) => col._id.toString() === id);
-    if (!collection) {
-      return res.status(404).json({ error: 'Collection not found' });
-    }
-    res.json(collection);
-  } catch (error) {
-    console.error('Error fetching collection:', error);
-    res.status(500).json({ error: 'Failed to fetch collection details' });
-  }
-});
-
-app.get("/api/search", async (req, res) => {
-  const searchQuery = req.query.title;
-  const offset = req.query.offset || 0;
-  const limit = 20;
-
-  if (!searchQuery) {
-    return res.status(400).json({ error: "Title query is required" });
-  }
-
-  function generateHash(timestamp) {
-    const privateKey = process.env.MARVEL_PRIVATE_KEY;
-    const publicKey = process.env.MARVEL_PUBLIC_KEY;
-    return md5(timestamp + privateKey + publicKey);
-  }
-  
-  const timestamp = new Date().getTime();
-  const hash = generateHash(timestamp);
-
-  try {
-    const response = await axios.get("https://gateway.marvel.com/v1/public/comics", {
-      params: {
-        apikey: process.env.MARVEL_PUBLIC_KEY,
-        ts: timestamp,
-        hash: hash,
-        title: searchQuery,
-        offset: offset,
-        limit: limit,
-      },
+    app.get('/profile', async (req, res) => {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'User not authenticated' })
+      }
+      res.json(req.user); 
     });
 
-    // Return the results from the Marvel API
-    res.json({
-      results: response.data.data.results,
-      total: response.data.data.total,
+    app.put('/update-profile', upload.single('profilePic'), async (req, res) => {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+      const { name, email, username } = req.body;
+      const profilePic = req.file ? req.file.path : null; // Get the file path if uploaded
+      try {
+        const updatedUser = await User.findOneAndUpdate(
+          { googleId: req.user.googleId },
+          { name, email, username, profilePic },
+          { new: true }
+        );
+
+        if (!updatedUser) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(updatedUser); // Send back the updated user data
+      } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+      }
     });
-  } catch (error) {
-    console.error("Error fetching comics from Marvel API:", error);
-    res.status(500).json({ error: "Failed to fetch comics" });
-  }
-});
 
+    // Collection management code
+    app.get('/collections/:id', async (req, res) => {
+      const { id } = req.params;
+      // Check if the provided ID is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid collection ID format' });
+      }
 
-if (process.env.NODE_ENV !== 'test') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(5000, () => {
-    console.log('Server running on port 5000');
+      try {
+        const user = await User.findOne({ 'collections._id': id }).populate('collections.comics');
+        if (!user) {
+          return res.status(404).json({ error: 'Collection not found' });
+        }
+        const collection = user.collections.find((col) => col._id.toString() === id);
+        if (!collection) {
+          return res.status(404).json({ error: 'Collection not found' });
+        }
+        res.json(collection);
+      } catch (error) {
+        console.error('Error fetching collection:', error);
+        res.status(500).json({ error: 'Failed to fetch collection details' });
+      }
+    });
+
+    app.get("/api/search", async (req, res) => {
+      const searchQuery = req.query.title;
+      const offset = req.query.offset || 0;
+      const limit = 20;
+
+      if (!searchQuery) {
+        return res.status(400).json({ error: "Title query is required" });
+      }
+
+      function generateHash(timestamp) {
+        const privateKey = process.env.MARVEL_PRIVATE_KEY;
+        const publicKey = process.env.MARVEL_PUBLIC_KEY;
+        return md5(timestamp + privateKey + publicKey);
+      }
+      
+      const timestamp = new Date().getTime();
+      const hash = generateHash(timestamp);
+
+      try {
+        const response = await axios.get("https://gateway.marvel.com/v1/public/comics", {
+          params: {
+            apikey: process.env.MARVEL_PUBLIC_KEY,
+            ts: timestamp,
+            hash: hash,
+            title: searchQuery,
+            offset: offset,
+            limit: limit,
+          },
+        });
+
+        // Return the results from the Marvel API
+        res.json({
+          results: response.data.data.results,
+          total: response.data.data.total,
+        });
+      } catch (error) {
+        console.error("Error fetching comics from Marvel API:", error);
+        res.status(500).json({ error: "Failed to fetch comics" });
+      }
+    });
+
+    // Start server only after connecting to the DB
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+  })
+  .catch(err => {
+    console.error('Error connecting to the database:', err);
+    process.exit(1); // Exit the process if database connection fails
   });
-}
 
-
-module.exports = app;  // Export the app for testing
+module.exports = app; // Export the app for testing

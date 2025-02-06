@@ -1,5 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Comic = require('../models/comic');
 const router = express.Router();
@@ -49,17 +48,6 @@ router.put('/update/:googleId', async (req, res) => {
   }
 });
 
-// Get all users
-router.get('/', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Error fetching users');
-  }
-});
-
 // Get a single user by ID
 router.get('/:googleId', async (req, res) => {
   try {
@@ -96,14 +84,17 @@ router.post('/:userId/collections', async (req, res) => {
 // Add a comic to an existing collection
 router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
   try {
-    const { title, issueNumber, authors, description, series } = req.body;
+    const { title, issueNumber, authors, description, thumbnail, series, variant, pgCount } = req.body;
     // Create a new comic
     const newComic = new Comic({
       title,
       issueNumber,
       authors,
       description,
+      thumbnail,
       series,
+      variant,
+      pgCount,
     });
     const savedComic = await newComic.save();
     // Find the user and collection

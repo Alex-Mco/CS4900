@@ -1,0 +1,35 @@
+const express = require('express');
+const passport = require('passport');
+const User = require('../models/user');
+
+const router = express.Router();
+
+router.get('/fake-login', async (req, res, next) => {
+  const fakeUser = {
+    googleId: '123',
+    username: 'testuser',
+    name: 'Test User',
+    email: 'testuser@example.com',
+  };
+
+  try {
+    let user = await User.findOne({ googleId: fakeUser.googleId });
+    if (!user) {
+      user = new User(fakeUser);
+      await user.save();
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      req.session.save(() => { 
+        res.json({ message: "Fake user logged in", user });
+      });
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Fake login failed" });
+  }
+});
+
+module.exports = router;

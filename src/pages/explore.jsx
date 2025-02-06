@@ -94,7 +94,6 @@ function ExplorePage() {
   // Handle the confirm button to add comic to selected collection
   const handleConfirmSelection = async () => {
     if (selectedCollection && selectedComic && user) {
-      console.log(selectedComic.id)
       const comicData = { 
         title: selectedComic.title, 
         thumbnail: {

@@ -1,39 +1,68 @@
 const passport = require('passport');
-const User = require('./database/models/user');
+const User = require('./models/user');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const MockStrategy = require('./tests/mocks/googleStratMock');
 require('dotenv').config();
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'http://localhost:5000/auth/google/callback',
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    // Check if the user already exists in the database
-    const existingUser = await User.findOne({ googleId: profile.id });
-    if (existingUser) {
-      return done(null, existingUser); // If the user exists, pass it to the session
-    } 
-    // If the user doesn't exist, create a new user with Google profile information
-    const username = await generateUniqueUsername(profile.emails[0].value.split('@')[0]);
-    const newUser = new User({
-      googleId: profile.id,
-      username: username, 
-      name: profile.displayName,
-      email: profile.emails[0].value, 
-      profilePic: profile.photos[0].value, 
-      collections: [], 
-    });
+const isTest = process.env.NODE_ENV === 'test';
 
-    await newUser.save();
-    return done(null, newUser);
-  } catch (err) {
-    console.error('Error during Google OAuth login:', err.message);
-    return done(err, null);
-  }
-}));
+if (isTest) {
+  passport.use(
+    new MockStrategy(async (accessToken, refreshToken, profile, done) => {
+      try {
+        const mockProfile = {
+          id: "test123",
+          displayName: "Test User",
+          emails: [{ value: "testuser@example.com" }],
+          photos: [{ value: "https://example.com/test-profile-pic.png" }]
+        };
 
-// to insure no two users have the same username
+        return done(null, mockProfile);
+      } catch (err) {
+        console.error('Error in Mock Strategy:', err.message);
+        return done(err, null);
+      }
+    })
+  );
+} else {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: 'http://localhost:5000/auth/google/callback',
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          // Check if the user already exists in the database
+          const existingUser = await User.findOne({ googleId: profile.id });
+          if (existingUser) {
+            return done(null, existingUser); // If the user exists, pass it to the session
+          } 
+          
+          // If the user doesn't exist, create a new user with Google profile information
+          const username = await generateUniqueUsername(profile.emails[0].value.split('@')[0]);
+          const newUser = new User({
+            googleId: profile.id,
+            username: username, 
+            name: profile.displayName,
+            email: profile.emails[0].value, 
+            profilePic: profile.photos[0].value, 
+            collections: [], 
+          });
+
+          await newUser.save();
+          return done(null, newUser);
+        } catch (err) {
+          console.error('Error during Google OAuth login:', err.message);
+          return done(err, null);
+        }
+      }
+    )
+  );
+}
+
+// Ensure no two users have the same username
 const generateUniqueUsername = async (emailPrefix) => {
   let username = emailPrefix;
   let count = 1;
@@ -46,24 +75,22 @@ const generateUniqueUsername = async (emailPrefix) => {
   return username;
 };
 
-// Serialize the user into the session
 passport.serializeUser((user, done) => {
-  done(null, user.googleId); 
+  done(null, user.googleId);
 });
 
-// Deserialize the user from the session
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (googleId, done) => {
   try {
-    const googleId = id
-
-    const user = await User.findOne({ googleId: googleId });
+    const user = await User.findOne({ googleId });
     if (!user) {
-      console.log('User not found');
       return done(null, false);
     }
     done(null, user);
   } catch (err) {
-    console.error('Error during deserialization:', err);
     done(err, null);
   }
 });
+
+
+
+module.exports = passport;
