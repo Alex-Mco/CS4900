@@ -2,16 +2,16 @@
 
 Model Layer: Jest (JavaScript)
         Test default constructor to ensure the default values are correctly initialized and that no exceptions are thrown
-        Test the buisness logic for things like filtering characters by name and filtering comics by title. (making sure it works for exact matches, partial matches and does not care about capitlization) 
+        Test the buisness logic for things like filtering characters by name and filtering comics by title. (making sure it works for exact matches, partial matches           and does not care about capitlization) 
         Test edge cases like empty/null/invalid. as well as the smallest values where lists only have one entry, and large values wehre their is thousands. 
-Controller Layer: Sinon (JavaScript)
+Controller Layer: Jest mock axios
         Mock an API response from Marvel API to do invalid and valid requests. make sure that both good and bad responses are handled 
         Test for combining more than one API call. 
 Database Layer: Jest with mock DB calls (JavaScript)
         Mock database and simulate interactions like adding, deleting, and updating.
         Test things like saving comics and characters to user favorites 
         Test edge cases. 
-View Layer: React Testing Library (for React apps)
+View Layer: Vitest
         Test that all UI elements work appropriatly (buttons, inputs, searches etc.)
         Test edge cases for empty and large things like search collections and favorites. 
         Test for accessibility of design
