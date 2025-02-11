@@ -17,58 +17,90 @@ Low-fidelity, Non-interactive, Mobile-First, Responsive GUI design/mockup (using
         Figma Link: https://www.figma.com/design/A85U9xDvjrntzoF4rn1IvB/Capstone?node-id=0-1&t=0bT4mYa8d1hwhFPY-1 
 
 Database Diagrams: 
-one collection for comics and characters: {
-  "characters": [
-    {
-      "id": "1009368",
-      "name": "Iron Man",
-      "description": "A wealthy industrialist and genius inventor...",
-      "image": "http://example.com/ironman.jpg",
-      "affiliations": ["Avengers", "Stark Industries"]
-    }
-  ],
+one collection for comics: {
   "comics": [
     {
-      "id": "001",
-      "title": "Avengers #1",
-      "issueNumber": 1,
-      "creators": ["Stan Lee", "Jack Kirby"],
-      "releaseDate": "1963-09-01"
+        title: {
+            type: String,
+            required: true,
+        },
+        issueNumber: {
+            type: Number,
+        },
+        creators:[{
+            role: {
+              type: String,
+            },
+            name: {
+              type: String,
+            }
+        }],
+        description: {
+            type: String,
+        },
+        thumbnail: {
+            path: {
+              type: String,
+            },
+            extension: {
+              type: String,
+            }
+        },
+        series:{
+            type: String,
+        },
+        variant:{
+            type: Boolean,
+        },
+        pgCount:{
+            type: Number, 
+        }
+    }
+  ]
+}
+one collection for collections:{
+"collection": [
+    {
+        collectionName: {
+            type: String,
+            required: true,
+        },
+        comics: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comic'
+        }],
     }
   ]
 }
 A different collection for users
 {
-  "_id": "user123",
-  "name": "Emily",
-  "email": "emily@example.com",
-  "savedCharacters": [
-    { "id": "1009368", "name": "Iron Man" },
-    { "id": "1009369", "name": "Thor" }
-  ],
-  "savedComics": [
-    { "id": "001", "title": "Avengers #1", "issueNumber": 1 }
-  ],
-  "preferences": {
-    "theme": "dark",
-    "language": "en"
+  googleId:{
+    type: String, 
+    required: true, 
+    unique: true,
   },
-  "collections": [
-    {
-      "id": "col001",
-      "name": "Iron Man Collection",
-      "comics": [
-        { "id": "001", "title": "Avengers #1", "issueNumber": 1 }
-      ]
-    },
-    {
-      "id": "col002",
-      "name": "Thor Collection",
-      "comics": [
-        { "id": "002", "title": "Thor #1", "issueNumber": 1 }
-      ]
-    }
-  ]
+  name: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    required:true,
+    unique: true,
+  },
+  password: {
+    type: String,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  profilePic:{
+    type: String,
+    required: false,
+  },
+  collections: [collectionSchema],
 }
 
 Json web service input and output for each RESTful endpoint: 
@@ -100,9 +132,10 @@ json
 }
 
 Architectural Stack:
-Frontend: React, TailwindCSS (on top of regular css).
-Backend: Node.js
+Frontend: React Vite
+Backend: Node.js, Express.js
 Database: MongoDB for user, comic, and character data
 API Integration: Marvel API (free to use with an account)
-Authentication: OAuth 2.0 for user authentication.
+Authentication: OAuth 2.0 with google for user authentication.
 Hosting: AWS frontend and backend.
+Testing: Jest for backend Vitest for frontend
