@@ -1,0 +1,12 @@
++-------------------+       0..*      +------------------+       0..*      +----------------+
+|   User            |---------------->| Collection       |---------------->|  Comic         |
++-------------------+                 +------------------+                 +----------------+
+| - googleId        |                 | + collectionName |                 | + title        |
+| - name            |                 | + comics [ ]     |                 | + issueNumber  |
+| + username        |                 +------------------+                 | + creators [ ] |
+| - password        |                                                      | + description  |
+| - email           |                                                      | + thumbnail    |
+| + profilePic      |                                                      | + series       |
+| + collections [ ] |                                                      | + variant      |
++-------------------+                                                      | + pgCount      |
+                                                                           +----------------+
