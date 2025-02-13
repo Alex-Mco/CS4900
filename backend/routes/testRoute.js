@@ -1,5 +1,5 @@
+//chatGPT helped me with figuring out mock authentication (proper ways to do it, giving me examples etc.)
 const express = require('express');
-const passport = require('passport');
 const User = require('../models/user');
 
 const router = express.Router();

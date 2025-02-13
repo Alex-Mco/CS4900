@@ -8,6 +8,7 @@ function CollectionPage() {
   const [collection, setCollection] = useState(null);
   const [comics, setComics] = useState([]);
   const [showAddComicModal, setShowAddComicModal] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Fetch the collection details
@@ -26,12 +27,17 @@ function CollectionPage() {
       .then(response => {
         setCollection(response.data); 
         setShowAddComicModal(false); 
+        setError(null)
       })
-      .catch(error => console.error('Error adding comic:', error));
+      .catch(error => {
+        console.error('Error adding comic:', error)
+        setError("Failed to add comic");
+      });
   };
 
   return (
     <div>
+      {error && <p role="alert">{error}</p>}
       {collection ? (
         <div>
           <div className="header-container">
@@ -42,20 +48,26 @@ function CollectionPage() {
           </div>
           
           <div className="comics-cards">
-            {collection.comics.map((comic) => (
-              <div key={comic._id} className="comic-card">
-                <h3>{comic.title}</h3>
-                <p>
-                  {comic.creators.map((creator, index) => (
-                    <span key={index}>
-                      {creator.role}: {creator.name}
-                      {index < comic.creators.items.length - 1 && ", "}
-                    </span>
-                  ))}
-                </p>
-                <p>{comic.description || "No description available."}</p>
-              </div>
-            ))}
+            {collection.comics?.length > 0 ? (
+              collection.comics.map((comic) => (
+                <div key={comic._id} className="comic-card">
+                  <h3>{comic.title}</h3>
+                  <p>
+                    {comic.creators?.length > 0
+                      ? comic.creators.map((creator, index) => (
+                          <span key={index}>
+                            {creator.role}: {creator.name}
+                            {index < comic.creators.length - 1 && ", "}
+                          </span>
+                        ))
+                      : "Unknown Creators"}
+                  </p>
+                  <p>{comic.description || "No description available."}</p>
+                </div>
+              ))
+            ) : (
+              <p>No comics in this collection.</p>
+            )}
           </div>
           <div className="add-container">
             <button className="add-button" onClick={() => setShowAddComicModal(true)}>Add Comic</button>
@@ -63,12 +75,16 @@ function CollectionPage() {
               <div className="modal">
                 <h2>Select a Comic to Add</h2>
                 <div className="comics-list">
-                  {comics.map((comic) => (
-                    <div key={comic._id} className="comic-item">
-                      <h3>{comic.title}</h3>
-                      <button onClick={() => handleAddComic(comic._id)}>Add to Collection</button>
-                    </div>
-                  ))}
+                  {comics.length > 0 ? (
+                    comics.map((comic) => (
+                      <div key={comic._id} className="comic-item">
+                        <h3>{comic.title}</h3>
+                        <button onClick={() => handleAddComic(comic._id)}>Add to Collection</button>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No comics available to add.</p>
+                  )}
                 </div>
                 <button onClick={() => setShowAddComicModal(false)}>Close</button>
               </div>

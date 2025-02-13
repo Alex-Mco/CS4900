@@ -1,3 +1,4 @@
+//chatGPT helped me with figuring out mock authentication (proper ways to do it, giving me examples etc.)
 const passport = require('passport');
 const util = require('util');
 

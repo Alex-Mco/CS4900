@@ -77,7 +77,9 @@ function Profile() {
         <div className="profile-container">
            <p>{isEditing ? (
               <>
+              <label htmlFor="profilePic">Profile Picture</label>
                 <input
+                id="profilePic"
                   type="file"
                   accept="image/*"
                   className="profile-input"

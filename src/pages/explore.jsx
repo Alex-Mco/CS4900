@@ -38,6 +38,7 @@ function ExplorePage() {
     } catch (error) {
       console.error("Error fetching comics:", error.response || error.message);
       setError("Failed to fetch comics");
+      console.log("update error state:", error)
     } finally {
       setLoading(false);
     }
@@ -141,6 +142,7 @@ function ExplorePage() {
       {/* Search Results */}
       <div className="results">
         <h2>Search Results</h2>
+        {error && <p role="alert">{error}</p>}
         {loading ? (
           <p>Loading...</p>
         ) : (

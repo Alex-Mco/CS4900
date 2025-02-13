@@ -1,15 +1,24 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Profile from '../pages/profile';
 import axios from 'axios';
-import { vi } from 'vitest'; // Import from vitest
+import { vi } from 'vitest';
+import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 
 vi.mock('axios'); // Mock axios
 
 describe('Profile Page', () => {
-  it('renders profile data correctly', async () => {
-    // Mock the API response
-    axios.get.mockResolvedValue({
+  const renderWithRouter = () => {
+    render(
+      <MemoryRouter>
+        <Profile />
+      </MemoryRouter>
+    );
+  };
+
+  test('renders profile data correctly', async () => {
+    axios.get.mockResolvedValueOnce({
       data: {
         name: 'John Doe',
         username: 'johndoe',
@@ -18,18 +27,15 @@ describe('Profile Page', () => {
       },
     });
 
-    render(<Profile />);
+    renderWithRouter();
 
-    await waitFor(() => screen.getByText(/John Doe/i));
-
-    // Check if profile data is rendered
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('johndoe')).toBeInTheDocument();
-    expect(screen.getByAltText('Profile')).toHaveAttribute('src', 'profile-pic-url');
+    expect(await screen.findByText(/John Doe/i)).toBeInTheDocument();
+    expect(await screen.findByText(/johndoe/i)).toBeInTheDocument();
+    expect(await screen.findByAltText('Profile')).toHaveAttribute('src', 'profile-pic-url');
   });
 
-  it('handles editing profile', async () => {
-    axios.get.mockResolvedValue({
+  test('handles editing profile', async () => {
+    axios.get.mockResolvedValueOnce({
       data: {
         name: 'John Doe',
         username: 'johndoe',
@@ -37,21 +43,25 @@ describe('Profile Page', () => {
         email: 'john@example.com',
       },
     });
-
-    render(<Profile />);
-
-    // Wait for the component to load data
-    await waitFor(() => screen.getByText(/John Doe/i));
-
-    // Simulate clicking the edit button
-    fireEvent.click(screen.getByText('Edit Profile'));
-
-    // Change the name and username inputs
-    fireEvent.change(screen.getByPlaceholderText('Name'), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'janedoe' } });
-
-    // Simulate saving the changes
-    axios.put.mockResolvedValue({
+  
+    renderWithRouter();
+  
+    // Wait for profile data to load
+    await screen.findByText(/John Doe/i);
+  
+    // Click "Edit Profile" to activate input fields
+    fireEvent.click(screen.getByText(/Edit Profile/i));
+  
+    // Wait for the input fields to appear
+    const nameInput = screen.getByDisplayValue('John Doe');
+    const usernameInput = screen.getByDisplayValue('johndoe');
+  
+    // Change values
+    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
+    fireEvent.change(usernameInput, { target: { value: 'janedoe' } });
+  
+    // Mock save profile request
+    axios.put.mockResolvedValueOnce({
       data: {
         name: 'Jane Doe',
         username: 'janedoe',
@@ -59,19 +69,22 @@ describe('Profile Page', () => {
         email: 'john@example.com',
       },
     });
-
-    fireEvent.click(screen.getByText('Save Changes'));
-
-    // Wait for the save to complete
-    await waitFor(() => screen.getByText(/Jane Doe/i));
-
-    // Check if the updated name and username are displayed
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    expect(screen.getByText('janedoe')).toBeInTheDocument();
+  
+    // Click "Save Changes" inside `act()` to ensure re-render
+    await act(async () => {
+      fireEvent.click(screen.getByText(/Save Changes/i));
+    });
+  
+    // Wait for state update before checking new values
+    await waitFor(() => {
+      expect(screen.getByText(/Jane Doe/i)).toBeInTheDocument();
+      expect(screen.getByText(/janedoe/i)).toBeInTheDocument();
+    });
   });
+  
 
-  it('handles file upload for profile picture', async () => {
-    axios.get.mockResolvedValue({
+  test('handles file upload for profile picture', async () => {
+    axios.get.mockResolvedValueOnce({
       data: {
         name: 'John Doe',
         username: 'johndoe',
@@ -80,29 +93,24 @@ describe('Profile Page', () => {
       },
     });
 
-    render(<Profile />);
+    renderWithRouter();
 
-    // Wait for the component to load data
-    await waitFor(() => screen.getByText(/John Doe/i));
+    await screen.findByText(/John Doe/i);
 
-    // Simulate clicking the edit button
     fireEvent.click(screen.getByText('Edit Profile'));
 
-    // Simulate file input change
     const file = new Blob(['dummy content'], { type: 'image/jpeg' });
     const fileInput = screen.getByLabelText('Profile Picture');
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Check if the preview image is shown
-    expect(screen.getByAltText('Preview')).toBeInTheDocument();
+    expect(await screen.findByAltText('Preview')).toBeInTheDocument();
   });
 
-  it('handles API error during profile fetch', async () => {
-    axios.get.mockRejectedValue(new Error('Failed to fetch'));
+  test('handles API error during profile fetch', async () => {
+    axios.get.mockRejectedValueOnce(new Error('Failed to fetch'));
 
-    render(<Profile />);
+    renderWithRouter();
 
-    // Check if loading message is shown
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(await screen.findByText('Loading...')).toBeInTheDocument();
   });
 });

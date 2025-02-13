@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom'; // Required to wrap the component for routing
-import Navbar from '../components/navbar'; // Import the Navbar component
+import { BrowserRouter } from 'react-router-dom';
+import Navbar from '../components/navbar'; 
+import '@testing-library/jest-dom';
 
 describe('Navbar', () => {
   it('renders the navbar with the correct links', () => {

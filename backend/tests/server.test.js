@@ -1,4 +1,5 @@
-
+//ChatGPT helped me by creating an example jest test and giving me functions I can call with jest.
+//also helped me with figuring out mock authentication (proper ways to do it, giving me examples etc.)
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');

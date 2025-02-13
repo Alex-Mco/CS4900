@@ -1,12 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { configDefaults } from 'vitest/config';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   test: {
-    globals: true, // Allows using globals like `expect` without importing
-    environment: 'jsdom', // Browser-like environment for testing
-    setupFiles: './src/setupTests.js', // Optional setup file for global test configurations
+    globals: true,
+    environment: 'jsdom', // Use jsdom for React component testing
+    include: ['src/tests/**/*.test.jsx'], // Only run frontend tests
+    exclude: [...configDefaults.exclude, 'backend/**'], // Exclude backend tests
   },
-})
+});
