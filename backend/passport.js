@@ -1,3 +1,4 @@
+//this file uses the real google strat if not in testing mode and then if in testing mode it uses the mocked strat I made.
 const passport = require('passport');
 const User = require('./models/user');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;

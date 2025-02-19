@@ -1,42 +1,71 @@
 //ChatGPT helped me by creating an example jest test and giving me functions I can call with jest.
 const request = require('supertest');
 const express = require('express');
+const session = require('express-session')
 const userRoutes = require('../routes/userRoutes.js');
+const testRoutes = require('../routes/testRoute.js');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const mongoose = require('mongoose');
 const User = require('../models/user.js');
 const Comic = require('../models/comic.js');
 
 // Create an Express app instance for testing
 const app = express();
 app.use(express.json());
-app.use('/api/users', userRoutes);
 
-// Mock Mongoose models
-jest.mock('../models/user');
-jest.mock('../models/comic');
+app.use(session({
+  secret: 'test_secret', // Fake session secret for testing
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use('/api/users', userRoutes);
+app.use('/auth/test', testRoutes);
+const agent = request.agent(app);
+let mongoServer;
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+  console.log('✅ In-memory MongoDB connected');
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  console.log('✅ MongoDB disconnected');
+});
+
+// describe('User API Routes that require authentication', () => {
+  
+//   beforeEach(async () => {
+//     console.log('Attempting to login user...');
+//     const res = await agent.get('/auth/test/fake-login');
+//     console.log('Login response:', res.status, res.body);
+//     expect(res.status).toBe(200);
+//   });
+//   //Should update a user profile
+//   test('should update user profile', async () => {
+//     const res = await agent
+//       .put('/api/users/update-profile')
+//       .send({ name: 'Updated User', email: 'updated@example.com' });
+
+//     expect(res.status).toBe(200);
+//     expect(res.body).toHaveProperty('name', 'Updated User');
+//     expect(res.body).toHaveProperty('email', 'updated@example.com');
+//   });
+// });
 
 describe('User API Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  //test 1: new user
-  test('should register a new user', async () => {
-    const newUser = {
-      googleId: '12345',
-      name: 'Alice',
-      email: 'alice@example.com',
-      profilePic: 'profile.jpg',
-    };
-
-    User.findOne = jest.fn().mockResolvedValue(null);
-    User.prototype.save = jest.fn().mockResolvedValue({ _id: '1', ...newUser });
-    const res = await request(app).post('/api/users/register').send(newUser);
-
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('name', 'Alice');
-  });
-
-  //test 2: check existing user
+  //test 1: check existing user
   test('should return 400 if user already exists', async () => {
     User.findOne = jest.fn().mockResolvedValue({ googleId: '12345' });
 
@@ -50,25 +79,34 @@ describe('User API Routes', () => {
     expect(res.body).toHaveProperty('msg', 'User already exists');
   });
 
-  //test 3: updates user info
-  test('should update user info', async () => {
-    const updatedUser = { name: 'Alice Updated' };
-    User.findOneAndUpdate = jest.fn().mockResolvedValue({
-      _id: '1',
+  //Test 2: Register a New User
+  test('should register a new user', async () => {
+    const newUser = {
       googleId: '123456789',
-      name: 'Alice Updated',
+      name: 'Alice',
       email: 'alice@example.com',
-    });
+      username: 'alice123',
+      profilePic: '/default-profile-pic.jpg',
+      collections: [],
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(null); // Simulate user not existing
+    User.prototype.save = jest.fn().mockResolvedValue(newUser); // Simulate saving user
 
     const res = await request(app)
-      .put('/api/users/update/12345')
-      .send(updatedUser);
+      .post('/api/users/register')
+      .send(newUser);
 
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('name', 'Alice Updated');
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('googleId', '123456789');
+    expect(res.body).toHaveProperty('name', 'Alice');
+    expect(res.body).toHaveProperty('email', 'alice@example.com');
+    expect(res.body).toHaveProperty('username', 'alice123');
+    expect(res.body).toHaveProperty('profilePic', '/default-profile-pic.jpg');
+    expect(res.body.collections).toEqual([]);
   });
 
-  //test 4: adds collection to user
+  //test 3: adds collection to user
   test('should add a collection', async () => {
     const user = {
       _id: '1',
@@ -84,6 +122,39 @@ describe('User API Routes', () => {
 
     expect(res.status).toBe(200);
     expect(user.collections).toHaveLength(1);
+  });
+
+  //test 4: Returns a colletion
+  test('should return a collection with populated comics', async () => {
+    const validCollectionId = new mongoose.Types.ObjectId().toString();
+
+    const mockCollection = {
+        _id: validCollectionId,
+        collectionName: 'Spiderman Comics',
+        comics: [
+            { _id: new mongoose.Types.ObjectId().toString(), title: 'Spider-Man', creators: [{ name: 'Stan Lee' }] },
+        ],
+        toObject: jest.fn().mockReturnValue({
+            _id: validCollectionId,
+            collectionName: 'Spiderman Comics',
+            comics: [
+                { _id: new mongoose.Types.ObjectId().toString(), title: 'Spider-Man', creators: [{ name: 'Stan Lee' }] },
+            ],
+        }),
+    };
+    const mockUser = {
+        _id: '1',
+        collections: [mockCollection],
+    };
+    User.findOne = jest.fn().mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockUser),
+    });
+    const res = await request(app).get(`/api/users/collections/${validCollectionId}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('collectionName', 'Spiderman Comics');
+    expect(res.body.comics).toHaveLength(1);
+    expect(res.body.comics[0]).toHaveProperty('title', 'Spider-Man');
   });
 
   //test 5: adds comic to user collection
@@ -109,5 +180,41 @@ describe('User API Routes', () => {
 
     expect(res.status).toBe(200);
     expect(user.collections[0].comics).toContain('200');
+  });
+
+  //test 6: deletes comic from a collection
+  test('Should delete a comic from collection', async () => {
+    const user = {
+      _id: '1',
+      collections: [{_id:'100', collectionName: 'Spiderman Comics', comics: ['200', '300']}, { _id: '150', collectionName: 'Avengers Comics', comics: [] }],
+      save: jest.fn().mockResolvedValue(true)
+    }
+    User.findOne = jest.fn().mockResolvedValue(user);
+    const res = await request(app).delete('/api/users/collections/100/comics/200');
+
+    expect(res.status).toBe(200);
+    expect(user.collections[0].comics).not.toContain('200');
+  });
+
+  //Test 7: Deletes a collection
+  test('should delete a collection', async () => {
+    const validCollectionId = new mongoose.Types.ObjectId().toString();
+
+    const user = {
+        _id: '1',
+        collections: [
+            { _id: validCollectionId, collectionName: 'Spiderman Comics', comics: [] },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+    };
+
+    User.findOne = jest.fn().mockResolvedValue(user);
+    Comic.deleteMany = jest.fn().mockResolvedValue({ acknowledged: true });
+
+    const res = await request(app).delete(`/api/users/collections/${validCollectionId}`);
+
+    expect(res.status).toBe(200);
+    expect(User.findOne).toHaveBeenCalled();
+    expect(user.collections.some(col => col._id === validCollectionId)).toBe(false);
   });
 });

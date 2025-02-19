@@ -206,7 +206,7 @@ describe("ExplorePage Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Confirm/i }));
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith("http://localhost:5000/users/123/collections/abc/comics", expect.any(Object));
+      expect(axios.post).toHaveBeenCalledWith("http://localhost:5000/api/users/123/collections/abc/comics", expect.any(Object));
     });
   });
 

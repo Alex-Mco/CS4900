@@ -1,4 +1,5 @@
 //chatGPT helped me with figuring out mock authentication (proper ways to do it, giving me examples etc.)
+//this just mocks the google authentication callback so I do not have to actually use the real callback for testing
 const passport = require('passport');
 const util = require('util');
 

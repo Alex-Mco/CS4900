@@ -77,58 +77,32 @@ describe("CollectionPage Component", () => {
       expect(screen.getByText("A story about Spider-Man.")).toBeInTheDocument();
     });
   });
-
-  test("opens the Add Comic modal when clicking 'Add Comic'", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection });
-    axios.get.mockResolvedValueOnce({ data: mockComics });
-
+  test('Should delete a comic from collection', async () => {
+    axios.get.mockResolvedValueOnce({ data: mockCollection }); // Load initial collection
+    axios.delete.mockResolvedValueOnce({ status: 200 }); // Mock successful delete request
+  
     renderWithRouter("1");
-
-    await waitFor(() => screen.getByText("Add Comic"));
-
-    fireEvent.click(screen.getByText("Add Comic"));
-
+  
+    // Wait for the collection to load
     await waitFor(() => {
-      expect(screen.getByText("Select a Comic to Add")).toBeInTheDocument();
-      expect(screen.getByText("Iron Man")).toBeInTheDocument();
+      expect(screen.getByText("Spider-Man")).toBeInTheDocument();
+    });
+  
+    // Find and click the "Remove" button
+    const removeButton = screen.getByText("Remove");
+    fireEvent.click(removeButton);
+  
+    // Ensure Axios DELETE request was called
+    await waitFor(() => {
+      expect(axios.delete).toHaveBeenCalledWith(
+        "http://localhost:5000/api/users/collections/1/comics/101"
+      );
+    });
+  
+    // Ensure comic is removed from UI
+    await waitFor(() => {
+      expect(screen.queryByText("Spider-Man")).not.toBeInTheDocument();
     });
   });
-
-  test("calls API to add comic to collection", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection });
-    axios.get.mockResolvedValueOnce({ data: mockComics });
-
-    axios.post.mockResolvedValueOnce({ data: { ...mockCollection, comics: [...mockCollection.comics, mockComics[0]] } });
-
-    renderWithRouter("1");
-
-    await waitFor(() => screen.getByText("Add Comic"));
-    fireEvent.click(screen.getByText("Add Comic"));
-
-    await waitFor(() => screen.getByText("Iron Man"));
-    fireEvent.click(screen.getByRole("button", { name: /Add to Collection/i }));
-
-    await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith("http://localhost:5000/collections/1/add-comic", { comicId: "102" });
-    });
-  });
-
-  test("handles error when adding a comic", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection });
-    axios.get.mockResolvedValueOnce({ data: mockComics });
-
-    axios.post.mockRejectedValueOnce(new Error("Failed to add comic"));
-
-    renderWithRouter("1");
-
-    await waitFor(() => screen.getByText("Add Comic"));
-    fireEvent.click(screen.getByText("Add Comic"));
-
-    await waitFor(() => screen.getByText("Iron Man"));
-    fireEvent.click(screen.getByRole("button", { name: /Add to Collection/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText("Failed to add comic")).toBeInTheDocument();
-    });
-  });
+  
 });

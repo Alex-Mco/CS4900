@@ -38,11 +38,11 @@ function Profile() {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('username', username);
-      if (profilePic) {
-        formData.append('profilePic', profilePic); 
+      if(profilePic && profilePic instanceof File){
+        formData.append('profilePic', profilePic)
       }
   
-      axios.put(`http://localhost:5000/update-profile`, formData, {
+      axios.put(`http://localhost:5000/api/users/update-profile`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -50,6 +50,7 @@ function Profile() {
       })
         .then(response => {
           setUser(response.data);
+          setProfilePic(response.data.profilePic)
           setIsEditing(false);
         })
         .catch(error => {
@@ -76,42 +77,46 @@ function Profile() {
       {user ? (
         <div className="profile-container">
            <p>{isEditing ? (
-              <>
-              <label htmlFor="profilePic">Profile Picture</label>
-                <input
-                id="profilePic"
-                  type="file"
-                  accept="image/*"
-                  className="profile-input"
-                  onChange={handleFileChange}
+              <div className="profile-picture-container">
+              <label htmlFor="profilePic" className="hidden-label">Profile Picture</label>
+                <img
+                    src={previewPic || user.profilePic}
+                    alt="Profile"
+                    className="profile-picture"
                 />
-                {previewPic && <img src={previewPic} alt="Preview" className="profile-picture" />}
-                </>
+                <label htmlFor="profilePic" className="edit-overlay">Edit</label>
+                <input
+                    id="profilePic"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                />
+                </div>
               ) : (
                 <img src={user.profilePic} alt="Profile" className="profile-picture" />
               )}</p>
-          <p>Name: {isEditing ? (
+          <p className="profile-info">Name: <span>{isEditing ? (
             <input
               type="text"
               className="profile-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-          ) : (
-            user.name
-          )}</p>
-          <p>Username: {isEditing ? (
+          ) : user.name}</span></p>
+
+          <p className="profile-info">Username: <span>{isEditing ? (
             <input
               type="text"
               className="profile-input"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-          ) : (
-            user.username
-          )}</p>
-          {!isEditing && <p>Email: {user.email}</p>}
-          <div>
+          ) : user.username}</span></p>
+
+          {!isEditing && (
+            <p className="profile-info">Email: <span>{user.email}</span></p>
+          )}
+          <div className="button-group">
             {isEditing ? (
               <button className="edit-profile-btn" onClick={handleSaveChanges}>
                 Save Changes
@@ -124,7 +129,7 @@ function Profile() {
           </div>
         </div>
       ) : (
-        <p>Loading...</p>
+        <p className='loading'>Loading...</p>
       )}
     </div>
   );

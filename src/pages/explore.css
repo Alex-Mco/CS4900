@@ -42,7 +42,7 @@ body {
 .search-bar input[type="text"] {
   flex: 1;
   padding: 10px;
-  border: 1px solid #c6a972; 
+  border: 2px solid #c6a972; 
   border-radius: 5px 0 0 5px;
   font-size: 1rem;
   color: #151515; 
@@ -109,4 +109,7 @@ body {
 .exploreBtn{
   padding: 10px;
   margin: 10px 25px 50px 25px;
+}
+.loading{
+  color:#c6a972;
 }

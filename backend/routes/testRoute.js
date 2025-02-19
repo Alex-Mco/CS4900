@@ -1,10 +1,13 @@
 //chatGPT helped me with figuring out mock authentication (proper ways to do it, giving me examples etc.)
+//this is a fake route that is only used when testing, it mocks authentication so the real Google Oauth2 is not hit
 const express = require('express');
 const User = require('../models/user');
 
 const router = express.Router();
 
 router.get('/fake-login', async (req, res, next) => {
+  console.log("✅ testRoute.js loaded");
+
   const fakeUser = {
     googleId: '123',
     username: 'testuser',

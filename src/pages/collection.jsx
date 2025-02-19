@@ -1,38 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './collection.css';
 
 function CollectionPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [collection, setCollection] = useState(null);
   const [comics, setComics] = useState([]);
-  const [showAddComicModal, setShowAddComicModal] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     // Fetch the collection details
-    axios.get(`http://localhost:5000/collections/${id}`)
+    axios.get(`http://localhost:5000/api/users/collections/${id}`)
       .then(response => setCollection(response.data))
       .catch(error => console.error('Error fetching collection:', error));
-
-    // Fetch all comics available to add
-    axios.get('http://localhost:5000/comics')
-      .then(response => setComics(response.data))
-      .catch(error => console.error('Error fetching comics:', error));
   }, [id]);
 
-  const handleAddComic = (comicId) => {
-    axios.post(`http://localhost:5000/collections/${id}/add-comic`, { comicId })
-      .then(response => {
-        setCollection(response.data); 
-        setShowAddComicModal(false); 
-        setError(null)
+  const handleRemoveComic = (comicId) => {
+    axios
+      .delete(`http://localhost:5000/api/users/collections/${id}/comics/${comicId}`)
+      .then(() => {
+        // Filter out the removed comic manually
+        setCollection((prevCollection) => ({
+          ...prevCollection,
+          comics: prevCollection.comics.filter((comic) => comic._id !== comicId),
+        }));
+        setError(null);
       })
-      .catch(error => {
-        console.error('Error adding comic:', error)
-        setError("Failed to add comic");
+      .catch((error) => {
+        console.error("Error removing comic:", error);
+        setError("Failed to remove comic");
       });
+  };
+  
+  const handleDeleteCollection = () => {
+    if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
+      axios.delete(`http://localhost:5000/api/users/collections/${id}`)
+        .then(() => {
+          navigate("/collections");
+        })
+        .catch(error => console.error('Error deleting collection:', error));
+    }
   };
 
   return (
@@ -45,6 +55,9 @@ function CollectionPage() {
               <button>Back to Collections</button>
             </Link>
             <h1 className="collection-title">{collection.collectionName}</h1>
+            <button className="delete-btn" onClick={() => handleDeleteCollection(collection._id)}>
+              Delete Collection
+            </button>
           </div>
           
           <div className="comics-cards">
@@ -53,41 +66,23 @@ function CollectionPage() {
                 <div key={comic._id} className="comic-card">
                   <h3>{comic.title}</h3>
                   <p>
-                    {comic.creators?.length > 0
+                    {Array.isArray(comic.creators) && comic.creators.length > 0
                       ? comic.creators.map((creator, index) => (
                           <span key={index}>
-                            {creator.role}: {creator.name}
+                            {creator?.role ? `${creator.role}: ` : ""}{creator?.name || "Unknown"}
                             {index < comic.creators.length - 1 && ", "}
                           </span>
                         ))
-                      : "Unknown Creators"}
+                      : "Creators not available"}
                   </p>
                   <p>{comic.description || "No description available."}</p>
+                  <button className="remove-btn" onClick={() => handleRemoveComic(comic._id)}>
+                    Remove
+                  </button>
                 </div>
               ))
             ) : (
               <p>No comics in this collection.</p>
-            )}
-          </div>
-          <div className="add-container">
-            <button className="add-button" onClick={() => setShowAddComicModal(true)}>Add Comic</button>
-            {showAddComicModal && (
-              <div className="modal">
-                <h2>Select a Comic to Add</h2>
-                <div className="comics-list">
-                  {comics.length > 0 ? (
-                    comics.map((comic) => (
-                      <div key={comic._id} className="comic-item">
-                        <h3>{comic.title}</h3>
-                        <button onClick={() => handleAddComic(comic._id)}>Add to Collection</button>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No comics available to add.</p>
-                  )}
-                </div>
-                <button onClick={() => setShowAddComicModal(false)}>Close</button>
-              </div>
             )}
           </div>
         </div>

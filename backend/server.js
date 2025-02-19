@@ -25,23 +25,29 @@ app.use(express.urlencoded({ extended: true })); // For parsing application/x-ww
 
 // File upload setup
 const multer = require('multer'); // For form data file uploads/updates
-const upload = multer({ dest: 'uploads/' }); // Temporary storage location for uploaded files
+const path = require('path');
+const storage = multer.diskStorage({
+  destination: function(req, file, cb){
+    cb(null, 'uploads/');
+  },
+  filename: function(req,file,cb){
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({storage})
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session setup with MongoDB Atlas store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'defaultsecret',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017/testdb', // Ensure fallback value
+      mongoUrl: process.env.MONGO_URL,
       collectionName: 'sessions',
       ttl: 14 * 24 * 60 * 60, // 14 days
     }),
-    cookie: {
-      secure: false, // Ensure secure is false in testing environments
-      httpOnly: true,
-    },
   })
 );
 
@@ -76,7 +82,7 @@ connectDatabase()
     
     //Test routes
     app.use('/auth/test', testRoutes);
-    // Profile routes and code
+    // Profile routes and code (which includes collections)
     app.use('/api/users', usersRoutes);
 
     app.get('/profile', async (req, res) => {
@@ -84,54 +90,6 @@ connectDatabase()
         return res.status(401).json({ error: 'User not authenticated' })
       }
       res.json(req.user); 
-    });
-
-    app.put('/update-profile', upload.single('profilePic'), async (req, res) => {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'User not authenticated' });
-      }
-      const { name, email, username } = req.body;
-      const profilePic = req.file ? req.file.path : null; // Get the file path if uploaded
-      try {
-        const updatedUser = await User.findOneAndUpdate(
-          { googleId: req.user.googleId },
-          { name, email, username, profilePic },
-          { new: true }
-        );
-
-        if (!updatedUser) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.json(updatedUser); // Send back the updated user data
-      } catch (error) {
-        console.error('Error updating user profile:', error);
-        res.status(500).json({ error: 'Failed to update profile' });
-      }
-    });
-
-    // Collection management code
-    app.get('/collections/:id', async (req, res) => {
-      const { id } = req.params;
-      // Check if the provided ID is a valid ObjectId
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ error: 'Invalid collection ID format' });
-      }
-
-      try {
-        const user = await User.findOne({ 'collections._id': id }).populate('collections.comics');
-        if (!user) {
-          return res.status(404).json({ error: 'Collection not found' });
-        }
-        const collection = user.collections.find((col) => col._id.toString() === id);
-        if (!collection) {
-          return res.status(404).json({ error: 'Collection not found' });
-        }
-        res.json(collection);
-      } catch (error) {
-        console.error('Error fetching collection:', error);
-        res.status(500).json({ error: 'Failed to fetch collection details' });
-      }
     });
 
     app.get("/api/search", async (req, res) => {

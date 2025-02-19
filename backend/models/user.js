@@ -1,7 +1,7 @@
-//users model schema for the database, includes collection because that is directly part of the user
+//users model schema for the database, 
+//includes collection because that is directly part of the user and cannot be used otherwise
 
 const mongoose = require('mongoose');
-const Comic = require('./comic');
 
 const collectionSchema = new mongoose.Schema({
   collectionName: {

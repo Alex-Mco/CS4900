@@ -111,7 +111,7 @@ function ExplorePage() {
       };
   
       try {
-        await axios.post(`http://localhost:5000/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
+        await axios.post(`http://localhost:5000/api/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
         alert("Comic added to collection!");
         setSelectedComic(null);
         setSelectedCollection(null);
@@ -133,6 +133,7 @@ function ExplorePage() {
           placeholder="Search for comics or characters..."
           value={searchQuery}
           onChange={handleSearchChange}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         />
         <button type="button" onClick={handleSearch} disabled={loading}>
           Search
@@ -141,10 +142,9 @@ function ExplorePage() {
 
       {/* Search Results */}
       <div className="results">
-        <h2>Search Results</h2>
         {error && <p role="alert">{error}</p>}
         {loading ? (
-          <p>Loading...</p>
+          <p className='loading'>Loading...</p>
         ) : (
           comics.map((comic) => (
             <div key={comic.id} className="result-item">

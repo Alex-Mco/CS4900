@@ -103,7 +103,11 @@ describe('Profile Page', () => {
     const fileInput = screen.getByLabelText('Profile Picture');
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    expect(await screen.findByAltText('Preview')).toBeInTheDocument();
+
+    await waitFor(() => {
+      const profileImg = screen.getByAltText('Profile');
+      expect(profileImg.src).toContain('profile-pic-url'); 
+    });
   });
 
   test('handles API error during profile fetch', async () => {

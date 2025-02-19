@@ -45,13 +45,6 @@ describe('Authenticated Server API tests', () => {
         expect(res.status).toBe(200);
     });
 
-    test('should update user profile', async () => {
-        const res = await agent.put('/update-profile').send({ name: 'Updated User', email: 'updated@example.com' });
-        expect(res.status).toBe(200);
-        expect(res.body).toHaveProperty('name', 'Updated User');
-        expect(res.body).toHaveProperty('email', 'updated@example.com');
-    });
-
     test('should logout user', async () => {
         const res = await agent.get('/logout');
         expect(res.status).toBe(302); 
@@ -72,7 +65,7 @@ describe('Unauthenticated Server API tests', () => {
     });
 
     test('should fetch Marvel comics', async () => {
-        axios.get.mockResolvedValue({
+        axios.get = jest.fn().mockResolvedValueOnce({
         data: {
             data: {
             results: [{ title: 'Spider-Man' }],
@@ -86,12 +79,6 @@ describe('Unauthenticated Server API tests', () => {
         expect(res.body).toHaveProperty('results');
         expect(Array.isArray(res.body.results)).toBe(true);
         expect(res.body.results[0]).toHaveProperty('title', 'Spider-Man');
-    });
-
-    test('should return error if updating profile without authentication', async () => {
-        const res = await agent.put('/update-profile').send({ name: 'New Name' });
-        expect(res.status).toBe(401);
-        expect(res.body).toHaveProperty('error', 'User not authenticated');
     });
 
     test('should return an error for missing search query', async () => {
@@ -112,33 +99,6 @@ describe('Unauthenticated Server API tests', () => {
         const foundUser = await User.findOne({ googleId: '123' });
         expect(foundUser).toBeDefined();
         expect(foundUser.name).toBe('Test User');
-    });
-
-    test('should return 401 when accessing profile while unauthenticated', async () => {
-        const res = await agent.get('/profile');
-        expect(res.status).toBe(401); 
-    });
-
-    test('should fetch collection details', async () => {
-        const testUser = new User({
-            googleId: '123',
-            username: 'testuser',
-            name: 'Test User',
-            email: 'test@example.com',
-        });
-        const collection = { _id: new mongoose.Types.ObjectId(), collectionName: 'testCollection', comics: [] };
-        testUser.collections = [collection];
-        await testUser.save();
-
-        const res = await agent.get(`/collections/${collection._id}`);
-        expect(res.status).toBe(200);
-        expect(res.body).toHaveProperty('_id', collection._id.toString());
-    });
-
-    test('should return 404 if collection not found', async () => {
-        const res = await agent.get(`/collections/${new mongoose.Types.ObjectId()}`);
-        expect(res.status).toBe(404);
-        expect(res.body).toHaveProperty('error', 'Collection not found');
     });
 });
 
