@@ -26,3 +26,6 @@ dist-ssr
 #private info
 .env
 playground-1.mongodb.js
+
+#Photo uploads
+/uploads

@@ -31,13 +31,11 @@ beforeAll(async () => {
     useNewUrlParser: true,
     useUnifiedTopology: true
   });
-  console.log('✅ In-memory MongoDB connected');
 });
 
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
-  console.log('✅ MongoDB disconnected');
 });
 
 // describe('User API Routes that require authentication', () => {

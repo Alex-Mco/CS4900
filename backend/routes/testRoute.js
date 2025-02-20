@@ -6,7 +6,6 @@ const User = require('../models/user');
 const router = express.Router();
 
 router.get('/fake-login', async (req, res, next) => {
-  console.log("✅ testRoute.js loaded");
 
   const fakeUser = {
     googleId: '123',

@@ -4,7 +4,6 @@ const Comic = require('../models/comic');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
-const session = require('express-session');
 
 const router = express.Router();
 

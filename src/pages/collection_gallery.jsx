@@ -15,7 +15,7 @@ function CollectionGallery() {
 
   const handleAddCollection = () => {
     if (newCollectionName && user) {
-      axios.post(`http://localhost:5000/users/${user._id}/collections`, { collectionName: newCollectionName })
+      axios.post(`http://localhost:5000/api/users/${user._id}/collections`, { collectionName: newCollectionName })
         .then(response => {
           setUser(response.data);
           setNewCollectionName(''); 
