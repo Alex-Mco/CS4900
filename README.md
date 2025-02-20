@@ -10,6 +10,8 @@ Marvel Nexus is a web application designed with the comic enthusiast in mind. It
 <li>Nodes.js</li>
 <li>MongoDB (cloud version)</li>
 <li>Marvel API</li>
+<li>>Vite</li>
+<li>Jest</li>
 
 ### Steps
 2. Clone the repo
@@ -34,13 +36,18 @@ Marvel Nexus is a web application designed with the comic enthusiast in mind. It
     ```
 5. Start the backend server:
    ```sh
-   npm run server
+   npm start
     ```
 7. Start the frontend application:
    ```sh
-   npm start
+   npm run preview
     ```
-9. Access the website: http://localhost:3000
+   OR
+   ```sh
+   npm run dev
+   ```
+9. Access the website with preview: http://localhost:5173
+    Access the website with dev: http://localhost:4173
     
 
 ## Usage
