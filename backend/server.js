@@ -92,6 +92,12 @@ connectDatabase()
       res.json(req.user); 
     });
 
+    function generateHash(timestamp) {
+      const privateKey = process.env.MARVEL_PRIVATE_KEY;
+      const publicKey = process.env.MARVEL_PUBLIC_KEY;
+      return md5(timestamp + privateKey + publicKey);
+    }
+    //Comic Title Search Endpoint
     app.get("/api/search", async (req, res) => {
       const searchQuery = req.query.title;
       const offset = req.query.offset || 0;
@@ -101,12 +107,6 @@ connectDatabase()
         return res.status(400).json({ error: "Title query is required" });
       }
 
-      function generateHash(timestamp) {
-        const privateKey = process.env.MARVEL_PRIVATE_KEY;
-        const publicKey = process.env.MARVEL_PUBLIC_KEY;
-        return md5(timestamp + privateKey + publicKey);
-      }
-      
       const timestamp = new Date().getTime();
       const hash = generateHash(timestamp);
 
@@ -116,7 +116,7 @@ connectDatabase()
             apikey: process.env.MARVEL_PUBLIC_KEY,
             ts: timestamp,
             hash: hash,
-            title: searchQuery,
+            titleStartsWith: searchQuery,
             offset: offset,
             limit: limit,
           },
@@ -130,6 +130,114 @@ connectDatabase()
       } catch (error) {
         console.error("Error fetching comics from Marvel API:", error);
         res.status(500).json({ error: "Failed to fetch comics" });
+      }
+    });
+
+    //Character Search Endpoint
+    app.get("/api/search/character", async (req, res) => {
+      const searchQuery = req.query.name;
+      const offset = req.query.offset || 0;
+      const limit = 20;
+
+      if (!searchQuery) {
+        return res.status(400).json({ error: "Name query is required" });
+      }
+
+      const timestamp = new Date().getTime();
+      const hash = generateHash(timestamp);
+
+      try {
+        // First, search for characters matching the query
+        const characterResponse = await axios.get("https://gateway.marvel.com/v1/public/characters", {
+          params: {
+            apikey: process.env.MARVEL_PUBLIC_KEY,
+            ts: timestamp,
+            hash: hash,
+            nameStartsWith: searchQuery,
+            offset: offset,
+            limit: limit,
+          },
+        });
+
+        if (characterResponse.data.data.results.length === 0) {
+          return res.json({ results: [], total: 0 });
+        }
+
+        // Take the first matching character's ID
+        const characterId = characterResponse.data.data.results[0].id;
+
+        // Now fetch comics for that character
+        const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics`, {
+          params: {
+            apikey: process.env.MARVEL_PUBLIC_KEY,
+            ts: timestamp,
+            hash: hash,
+            offset: offset,
+            limit: limit,
+          },
+        });
+
+        res.json({
+          results: comicsResponse.data.data.results,
+          total: comicsResponse.data.data.total,
+        });
+      } catch (error) {
+        console.error("Error fetching comics by character from Marvel API:", error);
+        res.status(500).json({ error: "Failed to fetch comics by character" });
+      }
+    });
+
+    //Series Search Endpoint
+    app.get("/api/search/series", async (req, res) => {
+      const searchQuery = req.query.series;
+      const offset = req.query.offset || 0;
+      const limit = 20;
+    
+      if (!searchQuery) {
+        return res.status(400).json({ error: "Series query is required" });
+      }
+    
+      const timestamp = new Date().getTime();
+      const hash = generateHash(timestamp);
+    
+      try {
+        // First, search for series matching the query
+        const seriesResponse = await axios.get("https://gateway.marvel.com/v1/public/series", {
+          params: {
+            apikey: process.env.MARVEL_PUBLIC_KEY,
+            ts: timestamp,
+            hash: hash,
+            titleStartsWith: searchQuery,
+            offset: offset,
+            limit: limit,
+          },
+        });
+    
+        if (seriesResponse.data.data.results.length === 0) {
+          return res.json({ results: [], total: 0 });
+        }
+    
+        // Use the first matching series' ID
+        const seriesId = seriesResponse.data.data.results[0].id;
+    
+        // Now fetch comics for that series
+        const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics`, {
+          params: {
+            apikey: process.env.MARVEL_PUBLIC_KEY,
+            ts: timestamp,
+            hash: hash,
+            offset: offset,
+            limit: limit,
+          },
+        });
+    
+        res.json({
+          results: comicsResponse.data.data.results,
+          total: comicsResponse.data.data.total,
+        });
+      } catch (error) {
+        console.error("Error fetching comics by series from Marvel API:", error);
+        res.status(500).json({ error: "Failed to fetch comics by series" });
       }
     });
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./explore.css";
+import ComicDetail from "../components/ComicDetails.jsx";
+import ComicCard from "../components/ComicCard";
 
 function ExplorePage() {
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
   const [comics, setComics] = useState([]); 
   const [loading, setLoading] = useState(false); 
   const [offset, setOffset] = useState(0);
@@ -12,6 +14,7 @@ function ExplorePage() {
   const [user, setUser] = useState(null); // To hold user data
   const [selectedCollection, setSelectedCollection] = useState(null); // To track selected collection
   const [error, setError] = useState(null); 
+  
 
   // Fetch user data when the component mounts
   useEffect(() => {
@@ -25,26 +28,42 @@ function ExplorePage() {
     setSearchQuery(e.target.value);
   };
 
-  // Perform the search when the user clicks the "Search" button
-  const handleSearch = async () => {
+  const getSearchConfig = (type, offsetValue) => {
+    let url = "http://localhost:5000/api/search";
+    let params = { offset: offsetValue };
+
+    if (type === "title") {
+      // Using partial match search for comic titles
+      params.title = searchQuery;
+    } else if (type === "character") {
+      // Call a dedicated endpoint for character search; backend should handle
+      url = "http://localhost:5000/api/search/character";
+      params.name = searchQuery;
+    } else if (type === "series") {
+      // Call a dedicated endpoint for series search; backend should handle
+      url = "http://localhost:5000/api/search/series";
+      params.series = searchQuery;
+    }
+    return { url, params };
+  };
+
+  // General search handler that accepts the type of search as an argument
+  const handleSearch = async (type) => {
     setLoading(true);
     setOffset(0);
     try {
-      const response = await axios.get("http://localhost:5000/api/search", {
-        params: { title: searchQuery, offset: 0 },
-      });
+      const { url, params } = getSearchConfig(type, 0);
+      const response = await axios.get(url, { params });
       setComics(response.data.results);
       setTotalComics(response.data.total);
     } catch (error) {
       console.error("Error fetching comics:", error.response || error.message);
       setError("Failed to fetch comics");
-      console.log("update error state:", error)
     } finally {
       setLoading(false);
     }
   };
 
-  // Load more comics when the "Next" button is clicked
   const loadMoreComics = async () => {
     setLoading(true);
     try {
@@ -52,8 +71,9 @@ function ExplorePage() {
       const response = await axios.get("http://localhost:5000/api/search", {
         params: { title: searchQuery, offset: newOffset },
       });
-      setComics((prevComics) => [...prevComics, ...response.data.results]);
+      setComics(response.data.results);
       setOffset(newOffset); 
+      window.scrollTo({top:0, behavior: "smooth"});
     } catch (error) {
       console.error("Error fetching more comics:", error.response || error.message);
       setError("Failed to fetch more comics");
@@ -61,8 +81,7 @@ function ExplorePage() {
       setLoading(false);
     }
   };
-
-  // Load previous comics when the "Previous" button is clicked
+  
   const loadPreviousComics = async () => {
     if (offset > 0) {
       setLoading(true);
@@ -73,6 +92,7 @@ function ExplorePage() {
         });
         setComics(response.data.results);
         setOffset(newOffset); 
+        window.scrollTo({top:0, behavior: "smooth"});
       } catch (error) {
         console.error("Error fetching previous comics:", error.response || error.message);
         setError("Failed to fetch previous comics");
@@ -81,18 +101,18 @@ function ExplorePage() {
       }
     }
   };
-
-  // Show collection selection for the selected comic
+  
+  // Function to trigger adding to collection
   const handleAddToCollection = (comic) => {
-    setSelectedComic(comic); 
+    setSelectedComic(comic);
   };
 
-  // Handle the collection selection
+  // Function to handle collection selection
   const handleCollectionChange = (collectionId) => {
     setSelectedCollection(collectionId);
   };
 
-  // Handle the confirm button to add comic to selected collection
+  // Function to confirm adding to collection
   const handleConfirmSelection = async () => {
     if (selectedCollection && selectedComic && user) {
       const comicData = { 
@@ -109,14 +129,14 @@ function ExplorePage() {
         description: selectedComic.description || 'No description available',
         series: selectedComic.series.name,
       };
-  
+
       try {
         await axios.post(`http://localhost:5000/api/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
         alert("Comic added to collection!");
         setSelectedComic(null);
         setSelectedCollection(null);
       } catch (error) {
-        console.error("Error adding comic to collection:", error.response || error.message);
+        console.error("Error adding comic to collection:", error);
         setError("Failed to add comic to collection");
       }
     } else {
@@ -124,80 +144,55 @@ function ExplorePage() {
     }
   };
 
+
   return (
     <div className="explore-page">
-      <h1>Explore</h1>
+      <h1>Explore Comics</h1>
       <div className="search-bar">
         <input
           type="text"
-          placeholder="Search for comics or characters..."
+          placeholder="Search for comics or characters, characters, or series..."
           value={searchQuery}
           onChange={handleSearchChange}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         />
-        <button type="button" onClick={handleSearch} disabled={loading}>
-          Search
-        </button>
+         <div className="search-buttons">
+          <button type="button" onClick={() => handleSearch("title")} disabled={loading}>
+            Search by Title
+          </button>
+          <button type="button" onClick={() => handleSearch("character")} disabled={loading}>
+            Search by Character
+          </button>
+          <button type="button" onClick={() => handleSearch("series")} disabled={loading}>
+            Search by Series
+          </button>
+        </div>
       </div>
 
-      {/* Search Results */}
-      <div className="results">
-        {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{error}</p>}
+
+      <div className="comic-container">
         {loading ? (
-          <p className='loading'>Loading...</p>
+          <p>Loading...</p>
         ) : (
           comics.map((comic) => (
-            <div key={comic.id} className="result-item">
-              <img
-                src={`${comic.thumbnail.path}.${comic.thumbnail.extension}`}
-                alt={comic.title}
-                className="thumbnail"
-              />
-              <div>
-                <h3>{comic.title}</h3>
-                <p>
-                  {comic.creators.items.map((creator, index) => (
-                    <span key={index}>
-                      {creator.role}: {creator.name}
-                      {index < comic.creators.items.length - 1 && ", "}
-                    </span>
-                  ))}
-                </p>
-                <p>{comic.description || "No description available."}</p>   
-                <button onClick={() => handleAddToCollection(comic)}>
-                  Add to Collection
-                </button>
-
-                {selectedComic && selectedComic.id === comic.id && user && (
-                  <div className="collection-selector">
-                    <h3>Select a Collection</h3>
-                    <div>
-                      {user.collections.map((collection) => (
-                        <div key={collection._id}>
-                          <input
-                            type="radio"
-                            id={`collection-${collection._id}`}
-                            name="collection"
-                            value={collection._id}
-                            checked={selectedCollection === collection._id}
-                            onChange={() => handleCollectionChange(collection._id)}
-                          />
-                          <label htmlFor={`collection-${collection._id}`}>
-                            {collection.collectionName}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={handleConfirmSelection}>Confirm</button>
-                    <button onClick={() => setSelectedComic(null)}>Cancel</button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <ComicCard
+              key={comic.id}
+              comic={comic}
+              onSelect={setSelectedComic}
+              onAddToCollection={handleAddToCollection}
+            />
           ))
         )}
       </div>
 
+      {/* Comic Detail and Collection Selection Modal */}
+      <ComicDetail 
+        comic={selectedComic} 
+        onClose={() => setSelectedComic(null)} 
+        userCollections={user?.collections || []} 
+        onCollectionChange={handleCollectionChange}
+        onConfirmSelection={handleConfirmSelection}
+      />
       <div className="pagination">
         <button
           className="exploreBtn"

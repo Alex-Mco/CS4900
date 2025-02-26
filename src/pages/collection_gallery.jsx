@@ -25,7 +25,7 @@ function CollectionGallery() {
   };
 
   return (
-    <div>
+    <div className="collection-gallery">
       <h1>Collections</h1>
       {user ? (
         <div className='collection-container'>

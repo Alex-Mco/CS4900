@@ -58,9 +58,7 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow-y:scroll;
 }
+
 .comic-card h3{
   color: #e62429;
-}
-.comic-card p{
-  color: #c6a972;
 }

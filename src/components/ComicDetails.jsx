@@ -1,0 +1,50 @@
+import React from "react";
+import "./ComicDetails.css";
+
+const ComicDetails = ({ comic, onClose, userCollections, onCollectionChange, onConfirmSelection }) => {
+  if (!comic) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Close Button (Top Right) */}
+        <button className="close-button" onClick={onClose}>✖</button>
+        
+        <div className="comic-header">
+          <img
+            src={`${comic.thumbnail.path}.${comic.thumbnail.extension}`}
+            alt={comic.title}
+            className="comic-image"
+          />
+          <h2>{comic.title}</h2>
+        </div>
+
+        <p><strong>Creators:</strong> {comic.creators.items.map(c => c.name).join(", ") || "Unknown"}</p>
+        <p><strong>Description:</strong> {comic.description || "No description available."}</p>
+        <p><strong>Series:</strong> {comic.series.name}</p>
+
+        {/* Collection Selection Section */}
+        {userCollections.length > 0 && (
+          <div className="collection-selector">
+            <h3>Select a Collection to Add this Comic to:</h3>
+            {userCollections.map((collection) => (
+              <label key={collection._id}>
+                <input 
+                  type="radio" 
+                  name="collection" 
+                  value={collection._id} 
+                  onChange={() => onCollectionChange(collection._id)} 
+                />
+                {collection.collectionName}
+              </label>
+            ))}
+            <button onClick={onConfirmSelection}>Confirm</button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+};
+
+export default ComicDetails;
