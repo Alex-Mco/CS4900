@@ -26,9 +26,9 @@ describe("ExplorePage Component", () => {
     await waitFor(() => expect(screen.getByText(/Explore/i)).toBeInTheDocument());
     expect(screen.getByText(/Explore/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Search for comics or characters/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Search/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Previous/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Next/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Search by Title/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Search by Character/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Search by Series/i })).toBeInTheDocument();
   });
 
   test("updates search input value", () => {
@@ -71,7 +71,7 @@ describe("ExplorePage Component", () => {
       screen.getByPlaceholderText(/Search for comics or characters/i),
       { target: { value: "Spider-Man" } }
     );
-    fireEvent.click(screen.getByRole("button", { name: /Search/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
   
     // Ensure API was called correctly
     await waitFor(() => {
@@ -108,8 +108,8 @@ describe("ExplorePage Component", () => {
       
     render(<ExplorePage />);
   
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics or characters/i), { target: { value: "Hulk" } });
-    fireEvent.click(screen.getByRole("button", { name: /Search/i }));
+    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Hulk" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
   
     await waitFor(() => {
       expect(screen.getByText(/Failed to fetch comics/i)).toBeInTheDocument();
@@ -141,8 +141,8 @@ describe("ExplorePage Component", () => {
 
     render(<ExplorePage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics or characters/i), { target: { value: "Iron Man" } });
-    fireEvent.click(screen.getByRole("button", { name: /Search/i }));
+    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Iron Man" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Iron Man/i)).toBeInTheDocument();
@@ -188,14 +188,16 @@ describe("ExplorePage Component", () => {
 
     render(<ExplorePage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics or characters/i), { target: { value: "Spider-Man" } });
-    fireEvent.click(screen.getByRole("button", { name: /Search/i }));
+    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Spider-Man" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
 
+    // Ensure a comic is displayed
     await waitFor(() => {
       expect(screen.getByText(/Spider-Man/i)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Add to Collection/i }));
+    // Click on the comic to trigger selection
+    fireEvent.click(screen.getByText(/Spider-Man/i)); 
 
     await waitFor(() => {
       expect(screen.getByText(/Select a Collection/i)).toBeInTheDocument();
@@ -239,14 +241,15 @@ describe("ExplorePage Component", () => {
 
     render(<ExplorePage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics or characters/i), { target: { value: "Spider-Man" } });
-    fireEvent.click(screen.getByRole("button", { name: /Search/i }));
+    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Spider-Man" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Spider-Man/i)).toBeInTheDocument();
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /Add to Collection/i }));
+    
+    // Click on the comic to trigger selection
+    fireEvent.click(screen.getByText(/Spider-Man/i)); 
 
     await waitFor(() => {
       expect(screen.getByText(/Select a Collection/i)).toBeInTheDocument();

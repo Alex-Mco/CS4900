@@ -3,12 +3,15 @@ import { useParams, Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './collection.css';
+import ComicCard from "../components/ComicCard";
+import ComicDetail from "../components/ComicDetails.jsx";
 
 function CollectionPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [collection, setCollection] = useState(null);
   const [comics, setComics] = useState([]);
+  const [selectedComic, setSelectedComic] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -19,20 +22,29 @@ function CollectionPage() {
   }, [id]);
 
   const handleRemoveComic = (comicId) => {
-    axios
-      .delete(`http://localhost:5000/api/users/collections/${id}/comics/${comicId}`)
-      .then(() => {
-        // Filter out the removed comic manually
-        setCollection((prevCollection) => ({
-          ...prevCollection,
-          comics: prevCollection.comics.filter((comic) => comic._id !== comicId),
-        }));
-        setError(null);
-      })
-      .catch((error) => {
-        console.error("Error removing comic:", error);
-        setError("Failed to remove comic");
-      });
+    if (window.confirm("Are you sure you want to delete this comic from the collection?")) {
+      axios
+        .delete(`http://localhost:5000/api/users/collections/${id}/comics/${comicId}`)
+        .then(() => {
+          console.log("Comic successfully removed from backend");
+          // Filter out the removed comic manually
+          setCollection((prevCollection) => {
+            if (!prevCollection) return null;
+            const updatedComics = prevCollection.comics.filter((comic) => comic._id !== comicId);
+            console.log("Updated comics after removal:", updatedComics);
+            return { ...prevCollection, comics: [...updatedComics] };
+          });
+  
+          // Close the modal if the removed comic is currently selected
+          setSelectedComic((prevSelected) => (prevSelected?._id === comicId ? null : prevSelected));
+  
+          setError(null);
+        })
+        .catch((error) => {
+          console.error("Error removing comic:", error);
+          setError("Failed to remove comic");
+        });
+    }
   };
   
   const handleDeleteCollection = () => {
@@ -61,33 +73,36 @@ function CollectionPage() {
           </div>
           
           <div className="comics-cards">
+          <div className="comic-container">
             {collection.comics?.length > 0 ? (
               collection.comics.map((comic) => (
-                <div key={comic._id} className="comic-card">
-                  <h3>{comic.title}</h3>
-                  <p>
-                    {Array.isArray(comic.creators) && comic.creators.length > 0
-                      ? comic.creators.map((creator, index) => (
-                          <span key={index}>
-                            {creator?.role ? `${creator.role}: ` : ""}{creator?.name || "Unknown"}
-                            {index < comic.creators.length - 1 && ", "}
-                          </span>
-                        ))
-                      : "Creators not available"}
-                  </p>
-                  <p>{comic.description || "No description available."}</p>
-                  <button className="remove-btn" onClick={() => handleRemoveComic(comic._id)}>
-                    Remove
-                  </button>
-                </div>
+                <ComicCard
+                  key={comic._id}
+                  comic={comic}
+                  onSelect={setSelectedComic}
+                  showAddToCollection={false} // Ensure add button is hidden
+                  showRemoveButton={true} // Show remove button
+                  onRemove={() => handleRemoveComic(comic._id)}
+                />
               ))
             ) : (
               <p>No comics in this collection.</p>
             )}
           </div>
+          </div>
         </div>
       ) : (
         <p>Loading...</p>
+      )}
+      {/* Comic Detail Modal */}
+      {selectedComic && (
+        <ComicDetail 
+          comic={selectedComic} 
+          onClose={() => setSelectedComic(null)} 
+          showAddToCollection={false} // Hide add button
+          showRemoveButton={true} // Show remove button
+          onRemove={() => handleRemoveComic(selectedComic._id)}
+        />
       )}
     </div>
   );

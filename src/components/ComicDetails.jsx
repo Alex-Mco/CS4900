@@ -1,9 +1,16 @@
 import React from "react";
 import "./ComicDetails.css";
 
-const ComicDetails = ({ comic, onClose, userCollections, onCollectionChange, onConfirmSelection }) => {
+const ComicDetails = ({ 
+  comic, 
+  onClose, 
+  userCollections = [], 
+  onCollectionChange, 
+  onConfirmSelection, 
+  showRemoveButton = false, 
+  onRemove 
+}) => {
   if (!comic) return null;
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -12,18 +19,22 @@ const ComicDetails = ({ comic, onClose, userCollections, onCollectionChange, onC
         
         <div className="comic-header">
           <img
-            src={`${comic.thumbnail.path}.${comic.thumbnail.extension}`}
+            src={`${comic.thumbnail?.path}.${comic.thumbnail?.extension}`}
             alt={comic.title}
             className="comic-image"
           />
           <h2>{comic.title}</h2>
         </div>
 
-        <p><strong>Creators:</strong> {comic.creators.items.map(c => c.name).join(", ") || "Unknown"}</p>
+        <p><strong>Creators:</strong> 
+          {comic.creators?.items?.length > 0 
+            ? comic.creators.items.map(c => c.name).join(", ") 
+            : "Unknown"}
+        </p>
         <p><strong>Description:</strong> {comic.description || "No description available."}</p>
-        <p><strong>Series:</strong> {comic.series.name}</p>
+        <p><strong>Series: </strong> {comic.series?.name || "Unknown"}</p>
 
-        {/* Collection Selection Section */}
+        {/* Collection Selection Section (Only show if collections exist) */}
         {userCollections.length > 0 && (
           <div className="collection-selector">
             <h3>Select a Collection to Add this Comic to:</h3>
@@ -40,6 +51,19 @@ const ComicDetails = ({ comic, onClose, userCollections, onCollectionChange, onC
             ))}
             <button onClick={onConfirmSelection}>Confirm</button>
           </div>
+        )}
+
+        {/* Remove Button (Only show if applicable) */}
+        {showRemoveButton && (
+          <button 
+            className="remove-btn" 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent closing the modal when clicking the button
+              onRemove();
+            }}
+          >
+            Remove from Collection
+          </button>
         )}
 
       </div>

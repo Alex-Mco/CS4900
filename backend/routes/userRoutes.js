@@ -49,10 +49,8 @@ const upload = multer({ storage });
 
 // Update user profile
 router.put('/update-profile', upload.single('profilePic'), async (req, res) => {
-
   const { name, email, username } = req.body;
   const profilePic = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
-
 
   try {
     const updatedUser = await User.findOneAndUpdate(
@@ -123,18 +121,33 @@ router.post('/:userId/collections', async (req, res) => {
 router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
   try {
     const { title, issueNumber, creators, description, thumbnail, series, variant, pgCount } = req.body;
+
+    // Ensure creators data is properly formatted
+    const formattedCreators = Array.isArray(creators)
+      ? { items: creators.map(creator => ({
+          role: creator.role || "Unknown",
+          name: creator.name || "Unknown",
+        })) }
+      : { items: [] };
+
+    // Ensure series is stored as an object (not just a string)
+    const formattedSeries = series && typeof series === "object" 
+      ? { name: series.name, resourceURI: series.resourceURI || "" }
+      : { name: series || "Unknown", resourceURI: "" };
     // Create a new comic
     const newComic = new Comic({
       title,
       issueNumber,
-      creators,
+      creators: formattedCreators, 
       description,
       thumbnail,
-      series,
+      series: formattedSeries,
       variant,
       pgCount,
     });
+
     const savedComic = await newComic.save();
+
     // Find the user and collection
     const user = await User.findById(req.params.userId);
     if (!user) {
@@ -150,7 +163,7 @@ router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
     collection.comics.push(savedComic._id);
     await user.save();
 
-    res.json(collection);
+    res.json({ msg: "Comic added to collection", collection });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Error adding comic to collection');
@@ -162,23 +175,44 @@ router.delete('/collections/:collectionId/comics/:comicId', async (req, res) => 
   try {
     const { collectionId, comicId } = req.params;
 
-    // Find the collection
+    // Validate if comicId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(comicId)) {
+      console.error("Invalid comicId format:", comicId);
+      return res.status(400).json({ msg: "Invalid comicId format" });
+    }
+
+    const objectIdComicId = new mongoose.Types.ObjectId(comicId);
+
+    // Find the user who owns this collection
     const user = await User.findOne({ 'collections._id': collectionId });
     if (!user) {
       return res.status(404).json({ msg: 'Collection not found' });
     }
 
     // Find the specific collection
-    const collection = user.collections.find(col => col._id.toString() === req.params.collectionId);
+    const collection = user.collections.find(col => col._id.toString() === collectionId);
     if (!collection) {
       return res.status(404).json({ msg: 'Collection not found' });
     }
 
+    // Ensure the comic exists in the collection before removing
+    if (!collection.comics.some(c => c.toString() === objectIdComicId.toString())) {
+      console.error("No matching comic found for removal:", objectIdComicId);
+      return res.status(404).json({ msg: 'Comic not found in collection' });
+    }
+
     // Remove the comic from the collection
-    collection.comics = collection.comics.filter(comic => comic.toString() !== comicId);
+    collection.comics = collection.comics.filter(comic => comic.toString() !== objectIdComicId.toString());
+
+    // Update the collection inside user.collections
+    user.collections = user.collections.map(col =>
+      col._id.toString() === collectionId ? { ...col, comics: collection.comics } : col
+    );
     
-    await user.save(); // Save changes to the database
-    res.json(collection); // Return the updated collection
+    // Save the updated user document
+    await user.save();
+
+    res.json({ msg: 'Comic removed successfully', collection });
   } catch (error) {
     console.error('Error removing comic from collection:', error);
     res.status(500).json({ msg: 'Server error' });

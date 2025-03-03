@@ -1,5 +1,3 @@
-//comic model schema for the database
-
 const mongoose = require('mongoose');
 
 const comicSchema = new mongoose.Schema({
@@ -10,14 +8,16 @@ const comicSchema = new mongoose.Schema({
   issueNumber: {
     type: Number,
   },
-  creators:[{
-    role: {
-      type: String,
-    },
-    name: {
-      type: String,
-    }
-  }],
+  creators: {
+    items: [{
+      role: {
+        type: String,
+      },
+      name: {
+        type: String,
+      }
+    }]
+  },
   description: {
     type: String,
   },
@@ -29,13 +29,14 @@ const comicSchema = new mongoose.Schema({
       type: String,
     }
   },
-  series:{
-    type: String,
+  series: {
+    name: { type: String, required: true },
+    resourceURI: { type: String, default: "" }
   },
-  variant:{
+  variant: {
     type: Boolean,
   },
-  pgCount:{
+  pgCount: {
     type: Number, 
   }
 });

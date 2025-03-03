@@ -17,6 +17,7 @@ const mockCollection = {
       title: "Spider-Man",
       creators: [{ role: "Writer", name: "Stan Lee" }],
       description: "A story about Spider-Man.",
+      thumbnail: {path: "/uploads/123432492987293875", extension: "jpg"}
     },
   ],
 };
@@ -44,6 +45,10 @@ describe("CollectionPage Component", () => {
     });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   function renderWithRouter(id) {
     render(
       <MemoryRouter initialEntries={[`/collections/${id}`]}>
@@ -55,8 +60,6 @@ describe("CollectionPage Component", () => {
   }
 
   test("displays loading state initially", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection });
-    axios.get.mockResolvedValueOnce({ data: mockComics });
 
     renderWithRouter("1");
 
@@ -66,43 +69,85 @@ describe("CollectionPage Component", () => {
   });
 
   test("renders collection details after fetching data", async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection });
-    axios.get.mockResolvedValueOnce({ data: mockComics });
-
     renderWithRouter("1");
-
+  
     await waitFor(() => {
-      expect(screen.getByText("SpiderMan Comics")).toBeInTheDocument();
-      expect(screen.getByText("Spider-Man")).toBeInTheDocument();
-      expect(screen.getByText("A story about Spider-Man.")).toBeInTheDocument();
+      expect(screen.getByText(/SpiderMan Comics/i)).toBeInTheDocument();
+    });
+  
+    expect(screen.getByText(/Spider-Man/i)).toBeInTheDocument();
+  
+    fireEvent.click(screen.getByText(/Spider-Man/i));
+  
+    await waitFor(() => {
+      expect(screen.getByText(/A story about Spider-Man./i)).toBeInTheDocument();
     });
   });
-  test('Should delete a comic from collection', async () => {
-    axios.get.mockResolvedValueOnce({ data: mockCollection }); // Load initial collection
+  
+
+  test("Should delete a comic from collection", async () => {
     axios.delete.mockResolvedValueOnce({ status: 200 }); // Mock successful delete request
-  
+
     renderWithRouter("1");
-  
+
     // Wait for the collection to load
     await waitFor(() => {
       expect(screen.getByText("Spider-Man")).toBeInTheDocument();
     });
-  
-    // Find and click the "Remove" button
-    const removeButton = screen.getByText("Remove");
+
+    // Mock confirmation dialog (ensure deletion proceeds)
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    // Find and click the "Remove" button inside ComicCard
+    const removeButton = screen.getByRole("button", { name: /remove/i });
     fireEvent.click(removeButton);
-  
+
     // Ensure Axios DELETE request was called
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith(
         "http://localhost:5000/api/users/collections/1/comics/101"
       );
     });
-  
+
     // Ensure comic is removed from UI
     await waitFor(() => {
       expect(screen.queryByText("Spider-Man")).not.toBeInTheDocument();
     });
+
+    // Restore confirm mock to prevent side effects
+    window.confirm.mockRestore();
   });
   
+  test("Should delete the entire collection", async () => {
+    axios.delete.mockResolvedValueOnce({ status: 200 }); // Mock collection deletion request
+
+    renderWithRouter("1");
+
+    // Wait for the collection to load
+    await waitFor(() => {
+      expect(screen.getByText("SpiderMan Comics")).toBeInTheDocument();
+    });
+
+    // Mock confirmation dialog
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    // Find and click the "Delete Collection" button
+    const deleteCollectionButton = screen.getByRole("button", { name: /delete collection/i });
+    fireEvent.click(deleteCollectionButton);
+
+    // Ensure Axios DELETE request was called for the collection
+    await waitFor(() => {
+      expect(axios.delete).toHaveBeenCalledWith(
+        "http://localhost:5000/api/users/collections/1"
+      );
+    });
+
+    // Ensure navigation to /collections (checking for UI update)
+    await waitFor(() => {
+      expect(screen.queryByText("SpiderMan Comics")).not.toBeInTheDocument();
+    });
+
+    // Restore confirm mock
+    window.confirm.mockRestore();
+  });
 });

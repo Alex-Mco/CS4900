@@ -122,10 +122,12 @@ function ExplorePage() {
           extension: selectedComic.thumbnail.extension,
         },  
         issueNumber: selectedComic.issueNumber || 'N/A',
-        creators: selectedComic.creators.items.map(creator => ({
-          role: creator.role || 'Unknown',
-          name: creator.name || 'Unknown',
-        })),
+        creators: Array.isArray(selectedComic.creators?.items)
+          ? selectedComic.creators.items.map(creator => ({
+              role: creator.role || "Unknown",
+              name: creator.name || "Unknown",
+            }))
+          : [],
         description: selectedComic.description || 'No description available',
         series: selectedComic.series.name,
       };
@@ -193,22 +195,28 @@ function ExplorePage() {
         onCollectionChange={handleCollectionChange}
         onConfirmSelection={handleConfirmSelection}
       />
-      <div className="pagination">
-        <button
-          className="exploreBtn"
-          onClick={loadPreviousComics}
-          disabled={offset === 0 || loading} 
-        >
-          Previous
-        </button>
-        <button
-          className="exploreBtn"
-          onClick={loadMoreComics}
-          disabled={comics.length >= totalComics || loading} 
-        >
-          Next
-        </button>
-      </div>
+      {comics.length > 0 && (
+        <div className="pagination">
+          {offset > 0 && (
+            <button
+              className="exploreBtn"
+              onClick={loadPreviousComics}
+              disabled={loading}
+            >
+              Previous
+            </button>
+          )}
+          {comics.length < totalComics && (
+            <button
+              className="exploreBtn"
+              onClick={loadMoreComics}
+              disabled={loading}
+            >
+              Next
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
