@@ -1,6 +1,4 @@
-#root{
-  width: 100vw;
-}
+
 .collection-gallery {
   width: 100%;
   display: flex;
@@ -9,6 +7,8 @@
   align-items: center;
 }
 h1{
+  font-size: 2.5rem;
+  margin-bottom: 0px;
   color: #e62429;
 }
 .collection-container{

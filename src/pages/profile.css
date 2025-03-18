@@ -1,27 +1,20 @@
-/* General Page Styling */
-body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-  color: white;
+
+div .content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 100vh;
+  width: 100%;
+  padding-top: 80px;
+  padding-bottom: 20px;
+  background-color: white;
 }
-div .content{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-/* Profile Page Container */
+
 .profile-page {
   width: 100%;
   max-width: 500px;
+  min-width: 400px;
   background: #1e1e1e;
   padding: 25px;
-  margin: 15px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   text-align: center;
@@ -36,13 +29,11 @@ div .content{
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* Profile Picture Container */
 .profile-picture-container {
   position: relative;
   display: inline-block;
 }
 
-/* Profile Picture */
 .profile-picture {
   width: 130px;
   height: 130px;
@@ -51,7 +42,7 @@ div .content{
   border: 3px solid #c6a972;
   transition: transform 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
-/* Visually Hide the Label but Keep It Accessible */
+
 .hidden-label {
   position: absolute;
   width: 1px;
@@ -65,10 +56,9 @@ div .content{
 }
 
 .profile-picture-container:hover .edit-overlay {
-  opacity: 1; /* Show the edit button on hover */
+  opacity: 1;
 }
 
-/* Edit Button Overlay */
 .edit-overlay {
   position: absolute;
   bottom: 5px;
@@ -80,15 +70,13 @@ div .content{
   border-radius: 50px;
   cursor: pointer;
   transition: opacity 0.3s ease-in-out;
-  opacity: 0; /* Hidden by default */
+  opacity: 0; 
 }
 
-/* Hide Default File Input */
 input[type="file"] {
   display: none;
 }
 
-/* Profile Info */
 .profile-info {
   font-size: 1rem;
   font-weight: bold;
@@ -104,10 +92,9 @@ input[type="file"] {
 
 .profile-info span {
   font-weight: normal;
-  color: #fff; /* Better contrast */
+  color: #fff; 
 }
 
-/* Inputs */
 .profile-input {
   width: 90%;
   padding: 12px;
@@ -120,11 +107,11 @@ input[type="file"] {
   text-align: center;
   outline: none;
 }
+
 .profile-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* Button Styling */
 .button-group {
   display: flex;
   justify-content: center;
@@ -151,7 +138,7 @@ input[type="file"] {
 .loading{
   color:#c6a972;
 }
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .profile-page {
       width: 90%;

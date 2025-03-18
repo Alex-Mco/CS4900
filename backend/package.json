@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-     "test:backend": "jest --config jest.config.js"
+    "test:backend": "jest --config jest.config.js --runInBand --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",

@@ -1,21 +1,28 @@
 const mongoose = require('mongoose');
 
 async function connectDatabase() {
-  try {
-    await mongoose.connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      tls: true,
-    });
+  if (process.env.NODE_ENV === 'test') {
+    console.log("Skipping MongoDB Atlas connection in test mode");
+    return;
+  }
 
-    console.log(`Connected to MongoDB Atlas: ${mongoose.connection.name} at ${mongoose.connection.host}`);
+  try {
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log(`Connected to MongoDB Atlas: ${mongoose.connection.name}`);
   } catch (err) {
     console.error("MongoDB connection error:", err);
-    process.exit(1); // Exit the process if connection fails
+    
+    if (process.env.NODE_ENV !== 'development') {
+      process.exit(1);
+    }
   }
 }
 
 async function disconnectDatabase() {
+  if (process.env.NODE_ENV === 'test') {
+    await mongoose.connection.dropDatabase(); // Cleanup test data
+  }
+  
   await mongoose.disconnect();
   console.log('MongoDB disconnected');
 }

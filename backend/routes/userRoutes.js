@@ -47,28 +47,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Update user profile
-router.put('/update-profile', upload.single('profilePic'), async (req, res) => {
-  const { name, email, username } = req.body;
-  const profilePic = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
-
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { googleId: req.user.googleId },
-      { name, email, username, profilePic },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
-  }
-});
-
 //Return collection
 router.get('/collections/:id', async (req, res) => {
   const { id } = req.params;
