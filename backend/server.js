@@ -50,6 +50,12 @@ app.use(
                 collectionName: 'sessions',
                 ttl: 14 * 24 * 60 * 60, // 14 days
               }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day expiration
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      sameSite: "lax",
+    },
   })
 );
 
@@ -71,12 +77,23 @@ connectDatabase()
       }
     );
 
+    app.get("/auth/session", (req, res) => {
+      if (req.isAuthenticated()) {
+        res.json({ isAuthenticated: true, user: req.user });
+      } else {
+        res.json({ isAuthenticated: false });
+      }
+    });
+
+    
     app.get('/logout', (req, res, next) => {
       req.logout((err) => {
         if (err) {
           return next(err);
         }
         req.session.destroy(() => {
+          res.clearCookie("connect.sid"); // Clear session cookie
+          res.json({ message: "Logged out successfully" });
           res.redirect('/');
         });
       });
