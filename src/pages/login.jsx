@@ -8,9 +8,9 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <p>Please log in using your Google account:</p>
+    <div id="login-div">
+      <h1 id="login-header">Login</h1>
+      <p id= "login-text">Please log in using your Google account:</p>
       <div className="googleLogIn">
         <button onClick={login} className="login-button">
           Log in with Google

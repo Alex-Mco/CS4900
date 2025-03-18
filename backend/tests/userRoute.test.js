@@ -13,50 +13,8 @@ const Comic = require('../models/comic.js');
 const app = express();
 app.use(express.json());
 
-app.use(session({
-  secret: 'test_secret', // Fake session secret for testing
-  resave: false,
-  saveUninitialized: false
-}));
-
 app.use('/api/users', userRoutes);
 app.use('/auth/test', testRoutes);
-const agent = request.agent(app);
-let mongoServer;
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
-
-// describe('User API Routes that require authentication', () => {
-  
-//   beforeEach(async () => {
-//     console.log('Attempting to login user...');
-//     const res = await agent.get('/auth/test/fake-login');
-//     console.log('Login response:', res.status, res.body);
-//     expect(res.status).toBe(200);
-//   });
-//   //Should update a user profile
-//   test('should update user profile', async () => {
-//     const res = await agent
-//       .put('/api/users/update-profile')
-//       .send({ name: 'Updated User', email: 'updated@example.com' });
-
-//     expect(res.status).toBe(200);
-//     expect(res.body).toHaveProperty('name', 'Updated User');
-//     expect(res.body).toHaveProperty('email', 'updated@example.com');
-//   });
-// });
 
 describe('User API Routes', () => {
   beforeEach(() => {
@@ -182,16 +140,18 @@ describe('User API Routes', () => {
 
   //test 6: deletes comic from a collection
   test('Should delete a comic from collection', async () => {
+    const validComicIdOne = new mongoose.Types.ObjectId().toString();
+    const validComicIdTwo = new mongoose.Types.ObjectId().toString();
     const user = {
       _id: '1',
-      collections: [{_id:'100', collectionName: 'Spiderman Comics', comics: ['200', '300']}, { _id: '150', collectionName: 'Avengers Comics', comics: [] }],
+      collections: [{_id:'100', collectionName: 'Spiderman Comics', comics: [validComicIdOne, validComicIdTwo]}, { _id: '150', collectionName: 'Avengers Comics', comics: [] }],
       save: jest.fn().mockResolvedValue(true)
     }
     User.findOne = jest.fn().mockResolvedValue(user);
-    const res = await request(app).delete('/api/users/collections/100/comics/200');
+    const res = await request(app).delete(`/api/users/collections/100/comics/${validComicIdOne}`);
 
     expect(res.status).toBe(200);
-    expect(user.collections[0].comics).not.toContain('200');
+    expect(user.collections[0].comics).not.toContain(validComicIdOne);
   });
 
   //Test 7: Deletes a collection
@@ -216,3 +176,21 @@ describe('User API Routes', () => {
     expect(user.collections.some(col => col._id === validCollectionId)).toBe(false);
   });
 });
+
+
+//should add a test for duplicate collection names and make sure that duplicate collection names cannot exsist
+// test('should return 400 if collection name already exists', async () => {
+//   const mockUser = {
+//     _id: '1',
+//     collections: [{ collectionName: 'Spiderman Comics' }],
+//   };
+
+//   User.findById = jest.fn().mockResolvedValue(mockUser);
+
+//   const res = await request(app)
+//     .post('/api/users/1/collections')
+//     .send({ collectionName: 'Spiderman Comics' });
+
+//   expect(res.status).toBe(400);
+//   expect(res.body).toHaveProperty('msg', 'Collection name already exists');
+// });

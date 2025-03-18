@@ -42,7 +42,7 @@ function Profile() {
         formData.append('profilePic', profilePic)
       }
   
-      axios.put(`http://localhost:5000/api/users/update-profile`, formData, {
+      axios.put(`http://localhost:5000/profile-update`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -72,65 +72,67 @@ function Profile() {
   };
 
   return (
-    <div className="profile-page">
-      <h1>Profile</h1>
-      {user ? (
-        <div className="profile-container">
-           <p>{isEditing ? (
-              <div className="profile-picture-container">
-              <label htmlFor="profilePic" className="hidden-label">Profile Picture</label>
-                <img
-                    src={previewPic || user.profilePic}
-                    alt="Profile"
-                    className="profile-picture"
-                />
-                <label htmlFor="profilePic" className="edit-overlay">Edit</label>
-                <input
-                    id="profilePic"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                />
-                </div>
-              ) : (
-                <img src={user.profilePic} alt="Profile" className="profile-picture" />
-              )}</p>
-          <p className="profile-info">Name: <span>{isEditing ? (
-            <input
-              type="text"
-              className="profile-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          ) : user.name}</span></p>
+    <div classNmae="profile-container">
+      <div className="profile-page">
+        <h1>Profile</h1>
+        {user ? (
+          <div className="profile-container">
+            <p>{isEditing ? (
+                <div className="profile-picture-container">
+                <label htmlFor="profilePic" className="hidden-label">Profile Picture</label>
+                  <img
+                      src={previewPic || user.profilePic}
+                      alt="Profile"
+                      className="profile-picture"
+                  />
+                  <label htmlFor="profilePic" className="edit-overlay">Edit</label>
+                  <input
+                      id="profilePic"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                  />
+                  </div>
+                ) : (
+                  <img src={user.profilePic} alt="Profile" className="profile-picture" />
+                )}</p>
+            <p className="profile-info">Name: <span>{isEditing ? (
+              <input
+                type="text"
+                className="profile-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            ) : user.name}</span></p>
 
-          <p className="profile-info">Username: <span>{isEditing ? (
-            <input
-              type="text"
-              className="profile-input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          ) : user.username}</span></p>
+            <p className="profile-info">Username: <span>{isEditing ? (
+              <input
+                type="text"
+                className="profile-input"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            ) : user.username}</span></p>
 
-          {!isEditing && (
-            <p className="profile-info">Email: <span>{user.email}</span></p>
-          )}
-          <div className="button-group">
-            {isEditing ? (
-              <button className="edit-profile-btn" onClick={handleSaveChanges}>
-                Save Changes
-              </button>
-            ) : (
-              <button className="edit-profile-btn" onClick={handleEditClick}>
-                Edit Profile
-              </button>
+            {!isEditing && (
+              <p className="profile-info">Email: <span>{user.email}</span></p>
             )}
+            <div className="button-group">
+              {isEditing ? (
+                <button className="edit-profile-btn" onClick={handleSaveChanges}>
+                  Save Changes
+                </button>
+              ) : (
+                <button className="edit-profile-btn" onClick={handleEditClick}>
+                  Edit Profile
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <p className='loading'>Loading...</p>
-      )}
+        ) : (
+          <p className='loading'>Loading...</p>
+        )}
+      </div>
     </div>
   );
 }

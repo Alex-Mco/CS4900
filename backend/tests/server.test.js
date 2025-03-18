@@ -6,6 +6,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../server');
 const User = require('../models/user');
 const axios = require('axios');
+jest.setTimeout(20000);
 
 let mongoServer;
 jest.mock('axios');
@@ -14,17 +15,16 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
 
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.disconnect();
+  await mongoose.connect(uri)
   console.log('In-memory MongoDB connected');
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
+  await mongoose.connection.dropDatabase();
+  await mongoose.connection.close();
   await mongoServer.stop();
-  console.log('MongoDB disconnected');
+  console.log('MongoDB memory server stopped');
   setTimeout(() => process.exit(), 1000).unref();
 });
 
@@ -45,6 +45,13 @@ describe('Authenticated Server API tests', () => {
         expect(res.status).toBe(200);
     });
 
+    test('should update user profile', async () => {
+        const res = await agent.put('/profile-update').send({ name: 'Updated User', email: 'updated@example.com' });
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('name', 'Updated User');
+        expect(res.body).toHaveProperty('email', 'updated@example.com');
+    });
+
     test('should logout user', async () => {
         const res = await agent.get('/logout');
         expect(res.status).toBe(302); 
@@ -53,6 +60,7 @@ describe('Authenticated Server API tests', () => {
         expect(afterLogout.status).toBe(401);
     });
 });
+
 
 describe('Unauthenticated Server API tests', () => {
     beforeEach(async () => {
@@ -101,5 +109,3 @@ describe('Unauthenticated Server API tests', () => {
         expect(foundUser.name).toBe('Test User');
     });
 });
-
-

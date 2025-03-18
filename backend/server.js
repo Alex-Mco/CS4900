@@ -1,4 +1,3 @@
-
 const md5 = require('md5');
 const express = require('express');
 const axios = require("axios");
@@ -43,11 +42,13 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URL,
-      collectionName: 'sessions',
-      ttl: 14 * 24 * 60 * 60, // 14 days
-    }),
+    store: process.env.NODE_ENV === 'test' 
+            ? new session.MemoryStore()  // Use in-memory store for tests
+            : MongoStore.create({ 
+                mongoUrl: process.env.MONGO_URL,
+                collectionName: 'sessions',
+                ttl: 14 * 24 * 60 * 60, // 14 days
+              }),
   })
 );
 
@@ -92,11 +93,40 @@ connectDatabase()
       res.json(req.user); 
     });
 
+    app.put('/profile-update', upload.single('profilePic'), async (req, res) => {
+    
+      if (!req.isAuthenticated()) {
+        console.error("No user found in req.user");
+        return res.status(401).json({ error: "Unauthorized: No user logged in" });
+      }
+    
+      const { name, email, username } = req.body;
+      const profilePic = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
+    
+      try {
+        const updatedUser = await User.findOneAndUpdate(
+          { googleId: req.user.googleId },
+          { name, email, username, profilePic },
+          { new: true }
+        );
+    
+        if (!updatedUser) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(updatedUser);
+      } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+      }
+    });
+    
+    
     function generateHash(timestamp) {
       const privateKey = process.env.MARVEL_PRIVATE_KEY;
       const publicKey = process.env.MARVEL_PUBLIC_KEY;
       return md5(timestamp + privateKey + publicKey);
     }
+    
     //Comic Title Search Endpoint
     app.get("/api/search", async (req, res) => {
       const searchQuery = req.query.title;
