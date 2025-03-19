@@ -17,7 +17,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/auth/session", { credentials: "include" })
+    fetch("process.env.REACT_APP_API_URL/auth/session", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         if (data.isAuthenticated) {

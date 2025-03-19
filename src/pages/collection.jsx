@@ -16,7 +16,7 @@ function CollectionPage() {
 
   useEffect(() => {
     // Fetch the collection details
-    axios.get(`http://localhost:5000/api/users/collections/${id}`)
+    axios.get(`process.env.REACT_APP_API_URL/api/users/collections/${id}`)
       .then(response => setCollection(response.data))
       .catch(error => console.error('Error fetching collection:', error));
   }, [id]);
@@ -24,7 +24,7 @@ function CollectionPage() {
   const handleRemoveComic = (comicId) => {
     if (window.confirm("Are you sure you want to delete this comic from the collection?")) {
       axios
-        .delete(`http://localhost:5000/api/users/collections/${id}/comics/${comicId}`)
+        .delete(`process.env.REACT_APP_API_URL/api/users/collections/${id}/comics/${comicId}`)
         .then(() => {
           console.log("Comic successfully removed from backend");
           // Filter out the removed comic manually
@@ -49,7 +49,7 @@ function CollectionPage() {
   
   const handleDeleteCollection = () => {
     if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
-      axios.delete(`http://localhost:5000/api/users/collections/${id}`)
+      axios.delete(`process.env.REACT_APP_API_URL/api/users/collections/${id}`)
         .then(() => {
           navigate("/collections");
         })

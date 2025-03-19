@@ -17,7 +17,7 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
+  origin: 'process.env.REACT_APP_FRONT_URL', // Frontend URL
   credentials: true, // Allow credentials (cookies) to be sent
 }));
 app.use(express.json()); // For parsing application/json
@@ -73,7 +73,7 @@ connectDatabase()
       '/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/' }),
       (req, res) => {
-        res.redirect('http://localhost:5173/profile');
+        res.redirect('process.env.process.env.REACT_APP_FRONT_URL/profile');
       }
     );
 
@@ -119,7 +119,7 @@ connectDatabase()
       }
     
       const { name, email, username } = req.body;
-      const profilePic = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
+      const profilePic = req.file ? `process.env.REACT_APP_BACK_URL/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
     
       try {
         const updatedUser = await User.findOneAndUpdate(
