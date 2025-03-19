@@ -16,64 +16,20 @@ Non-Functional Requirements:
 Low-fidelity, Non-interactive, Mobile-First, Responsive GUI design/mockup (using figma): 
         Figma Link: https://www.figma.com/design/A85U9xDvjrntzoF4rn1IvB/Capstone?node-id=0-1&t=0bT4mYa8d1hwhFPY-1 
 
-Database Diagrams: 
-one collection for comics: {
-  "comics": [
-    {
-        title: {
-            type: String,
-            required: true,
-        },
-        issueNumber: {
-            type: Number,
-        },
-        creators:[{
-            role: {
-              type: String,
-            },
-            name: {
-              type: String,
-            }
-        }],
-        description: {
-            type: String,
-        },
-        thumbnail: {
-            path: {
-              type: String,
-            },
-            extension: {
-              type: String,
-            }
-        },
-        series:{
-            type: String,
-        },
-        variant:{
-            type: Boolean,
-        },
-        pgCount:{
-            type: Number, 
-        }
-    }
-  ]
-}
-one collection for collections:{
-"collection": [
-    {
-        collectionName: {
-            type: String,
-            required: true,
-        },
-        comics: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comic'
-        }],
-    }
-  ]
-}
-A different collection for users
-{
+Database Diagrams/Models: 
+Collection model:
+const collectionSchema = new mongoose.Schema({
+  collectionName: {
+    type: String,
+    required: true,
+  },
+  comics: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comic'
+  }], 
+});
+User model:
+const userSchema = new mongoose.Schema({
   googleId:{
     type: String, 
     required: true, 
@@ -101,7 +57,49 @@ A different collection for users
     required: false,
   },
   collections: [collectionSchema],
-}
+});
+
+Comic Model:
+const comicSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  issueNumber: {
+    type: Number,
+  },
+  creators: {
+    items: [{
+      role: {
+        type: String,
+      },
+      name: {
+        type: String,
+      }
+    }]
+  },
+  description: {
+    type: String,
+  },
+  thumbnail: {
+    path: {
+      type: String,
+    },
+    extension: {
+      type: String,
+    }
+  },
+  series: {
+    name: { type: String, required: false },
+    resourceURI: { type: String, default: "" }
+  },
+  variant: {
+    type: Boolean,
+  },
+  pgCount: {
+    type: Number, 
+  }
+});
 
 Json web service input and output for each RESTful endpoint: 
 1. GET /characters?name=Iron+Man
