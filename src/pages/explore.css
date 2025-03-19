@@ -5,7 +5,6 @@
   flex-direction: column;
   align-items: center;
   color: #151515;;
-  box-sizing: border-box;
 }
 
 .explore-page h1 {
@@ -54,10 +53,8 @@
   flex-wrap: wrap;
   justify-content: center;
   width: 90%;
-  gap: 20px;
-  padding: 20px;
+  gap: 20px; 
 }
-
 
 .pagination{
   gap: 10px;

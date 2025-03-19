@@ -58,7 +58,7 @@ function CollectionPage() {
   };
 
   return (
-    <div>
+    <div className="collection-page">
       {error && <p role="alert">{error}</p>}
       {collection ? (
         <div>
