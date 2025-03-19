@@ -1,12 +1,12 @@
 ﻿Functional Requirements: 
-1. Search for characters by name, abilities, or teams.
-2. View character profiles with images, bios, and timelines.
-3. Filter characters by attributes (e.g., heroes, villains, anti-heroes).
-4. Search comics by title, series, or release date.
-5. Save comics to "favorites" or "to-read" lists.
-6. Provide personalized comic recommendations.
-7. User authentication using OAuth.
-8. Dashboard summarizing user preferences and saved items.
+1. Search comics by title, series, or character.
+2. Provide personalized comic recommendations.
+3. Show a list of Users Comics collections 
+4. Allow a user to add and delete comics to or from a collection
+5. User authentication using OAuth.
+6. Show and allow user profile to be edited
+7. Save all user information and have session management
+
 Non-Functional Requirements: 
 1. Performance: Fast response times for search queries (<2 seconds).
 2. Scalability: Handle a growing database of characters and comics.
