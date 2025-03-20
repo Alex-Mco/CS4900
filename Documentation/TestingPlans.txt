@@ -41,23 +41,7 @@ Use Case Test 3: Save Comics
         Search for a comic and view its details.
         Click "Add to Favorites."
         Navigate to the "Favorites" section and confirm the comic is listed.
-Use Case Test 4: Save Characters
-        User Story: As a user, I want to add a character to my favorites so I can access it later.
-        
-        Search for a character and view its details.
-        Click "Add to Favorites."
-        Navigate to the "Favorites" section and confirm the character is listed.
-Use Case Test 5: Explore Characters
-        User Story: As a user, I want to search for characters using the Marvel API and view a list of matching results.
-        
-        Navigate to the "Characters" page.
-        Enter a character name in the search bar.
-        Verify that the system displays a list of matching characters.
-        User Story: I want to view detailed profiles of characters, including their name, description, image, and affiliations.
-        
-        Select a character from the list.
-        Confirm that the detailed profile includes all specified information.
-Use Case Test 6: Explore Comics
+Use Case Test 4: Explore Comics
         User Story: As a user, I want to search for comics using the Marvel API and view a list of matching results.
         
         Navigate to the "Comics" page.
@@ -67,47 +51,43 @@ Use Case Test 6: Explore Comics
         
         Select a comic from the list.
         Confirm that the detailed profile includes all specified information.
-Use Case Test 7: Create Collection
+Use Case Test 5: Create Collection
         User Story: As a user, I want to create a new collection for comics or characters, with a name and optional description.
         
         Navigate to the "Collections" page.
         Click "Create Collection" and enter a name and description.
         Verify that the new collection appears in the list.
-Use Case Test 8: Add to Collection
+Use Case Test 6: Add to Collection
         User Story: As a user, I want to add a comic or character to a specific collection.
         
         Select a comic or character and choose "Add to Collection."
         Select a collection from the list and confirm the item is added.
-Use Case Test 9: View Collections
+Use Case Test 7: View Collections
         User Story: As a user, I want to browse my existing collections and view their contents.
         
         Navigate to the "Collections" page.
         Select a collection and verify that its contents are displayed.
-Use Case Test 10: Remove from Favorites or Collections
+Use Case Test 8: Remove from Collections
         User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
         
         Navigate to the "Favorites" or "Collections" page.
         Select an item and click "Remove."
         Verify that the item is removed from the list.
-Use Case Test 11: Update User Account
+Use Case Test 9: Remove Collections
+        User Story: As a user, I want to remove a collection from my collection list
+        
+        Navigate to the "Collections" page.
+        Select an item and click "Remove."
+        Verify that the item is removed from the list.
+Use Case Test 10: Update User Account
         User Story: As a user, I want to update my account settings, such as email or password.
         
         Navigate to the "Account Settings" page.
         Update the email or password and save changes.
         Verify that the changes are reflected.
-Use Case Test 12: Log Out
+Use Case Test 11: Log Out
         User Story: As a user, I want to log out of my account to end my session securely.
         
         Click the "Log Out" button.
         Verify that the system redirects to the login page and ends the session.
         Attempt to access a protected page and confirm that access is denied.
-Use Case Test 13: Explore Dashboard
-        User Story: As a user, I want to access and explore the dashboard to view an overview of my activity and saved items.
-        
-        Log in and navigate to the dashboard.
-        Verify that the dashboard displays an overview of activity and saved items.
-Use Case Test 14: View Recommended Comics
-        User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
-        
-        Log in and navigate to the recommendations section.
-        Verify that the system displays personalized comic recommendations.
