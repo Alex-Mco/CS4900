@@ -30,7 +30,7 @@ const comicSchema = new mongoose.Schema({
     }
   },
   series: {
-    name: { type: String, required: true },
+    name: { type: String, required: false },
     resourceURI: { type: String, default: "" }
   },
   variant: {

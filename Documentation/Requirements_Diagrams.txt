@@ -1,12 +1,12 @@
 ﻿Functional Requirements: 
-1. Search for characters by name, abilities, or teams.
-2. View character profiles with images, bios, and timelines.
-3. Filter characters by attributes (e.g., heroes, villains, anti-heroes).
-4. Search comics by title, series, or release date.
-5. Save comics to "favorites" or "to-read" lists.
-6. Provide personalized comic recommendations.
-7. User authentication using OAuth.
-8. Dashboard summarizing user preferences and saved items.
+1. Search comics by title, series, or character.
+2. Provide personalized comic recommendations.
+3. Show a list of Users Comics collections 
+4. Allow a user to add and delete comics to or from a collection
+5. User authentication using OAuth.
+6. Show and allow user profile to be edited
+7. Save all user information and have session management
+
 Non-Functional Requirements: 
 1. Performance: Fast response times for search queries (<2 seconds).
 2. Scalability: Handle a growing database of characters and comics.
@@ -16,64 +16,20 @@ Non-Functional Requirements:
 Low-fidelity, Non-interactive, Mobile-First, Responsive GUI design/mockup (using figma): 
         Figma Link: https://www.figma.com/design/A85U9xDvjrntzoF4rn1IvB/Capstone?node-id=0-1&t=0bT4mYa8d1hwhFPY-1 
 
-Database Diagrams: 
-one collection for comics: {
-  "comics": [
-    {
-        title: {
-            type: String,
-            required: true,
-        },
-        issueNumber: {
-            type: Number,
-        },
-        creators:[{
-            role: {
-              type: String,
-            },
-            name: {
-              type: String,
-            }
-        }],
-        description: {
-            type: String,
-        },
-        thumbnail: {
-            path: {
-              type: String,
-            },
-            extension: {
-              type: String,
-            }
-        },
-        series:{
-            type: String,
-        },
-        variant:{
-            type: Boolean,
-        },
-        pgCount:{
-            type: Number, 
-        }
-    }
-  ]
-}
-one collection for collections:{
-"collection": [
-    {
-        collectionName: {
-            type: String,
-            required: true,
-        },
-        comics: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comic'
-        }],
-    }
-  ]
-}
-A different collection for users
-{
+Database Diagrams/Models: 
+Collection model:
+const collectionSchema = new mongoose.Schema({
+  collectionName: {
+    type: String,
+    required: true,
+  },
+  comics: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comic'
+  }], 
+});
+User model:
+const userSchema = new mongoose.Schema({
   googleId:{
     type: String, 
     required: true, 
@@ -101,7 +57,49 @@ A different collection for users
     required: false,
   },
   collections: [collectionSchema],
-}
+});
+
+Comic Model:
+const comicSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  issueNumber: {
+    type: Number,
+  },
+  creators: {
+    items: [{
+      role: {
+        type: String,
+      },
+      name: {
+        type: String,
+      }
+    }]
+  },
+  description: {
+    type: String,
+  },
+  thumbnail: {
+    path: {
+      type: String,
+    },
+    extension: {
+      type: String,
+    }
+  },
+  series: {
+    name: { type: String, required: false },
+    resourceURI: { type: String, default: "" }
+  },
+  variant: {
+    type: Boolean,
+  },
+  pgCount: {
+    type: Number, 
+  }
+});
 
 Json web service input and output for each RESTful endpoint: 
 1. GET /characters?name=Iron+Man

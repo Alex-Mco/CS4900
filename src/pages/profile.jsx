@@ -72,7 +72,7 @@ function Profile() {
   };
 
   return (
-    <div classNmae="profile-container">
+    <div className="profile-container">
       <div className="profile-page">
         <h1>Profile</h1>
         {user ? (

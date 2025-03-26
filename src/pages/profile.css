@@ -1,12 +1,9 @@
 
-div .content {
+.profile-container{
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding-top: 80px;
-  padding-bottom: 20px;
-  background-color: white;
 }
 
 .profile-page {
@@ -21,7 +18,9 @@ div .content {
   backdrop-filter: blur(12px);
   transition: all 0.3s ease-in-out;
 }
-
+.profile-info{
+  width: 90%;
+}
 .profile-page h1{
   color: #e62429;
 }

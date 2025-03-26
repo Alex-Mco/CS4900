@@ -54,26 +54,24 @@ Use Case 4: Log In
         User Story: As a user, I want to log in to access my account using OAuth2.
 Use Case 5: Save Comics
         User Story: As a user, I want to add a comic to my favorites so I can access it later.
-Use Case 6: Save Characters
-        User Story: As a user, I want to add a character to my favorites so I can access it later.
-Use Case 7: Explore Characters
-        User Story: As a user, I want to search for characters using the Marvel API and view a list of matching results. I want to view detailed profiles of characters, including their name, description, image, and affiliations.
-Use Case 8: Explore Comics
+Use Case 6: Explore Comics
         User Story: As a user, I want to search for comics using the Marvel API and view a list of matching results. I want to view detailed profiles of comics, including their title, issue number, creators, and release date.
-Use Case 9: Create Collection
+Use Case 7: Create Collection
         User Story: As a user, I want to create a new collection for comics or characters, with a name and optional description.
-Use Case 10: Add to Collection
+Use Case 8: Add to Collection
         User Story: As a user, I want to add a comic or character to a specific collection.
-Use Case 11: View Collections
+Use Case 9: View Collections
         User Story: As a user, I want to browse my existing collections and view their contents.
-Use Case 12: Remove from Favorites or Collections
+Use Case 10: Remove from Collections
         User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
-Use Case 13: Update User Account
+Use Case 11: RemoveCollections
+        User Story: As a user, I want to remove a collection from my user.
+Use Case 12: Update User Account
         User Story: As a user, I want to update my account settings, such as email or password.
-Use Case 14: Log Out
+Use Case 13: Log Out
         User Story: As a user, I want to log out of my account to end my session securely.
-Use Case 15: Explore Dashboard
+Use Case 14: Explore Dashboard
         User Story: As a user, I want to access and explre the dashboard to view a overview of my activity and saved items
-Use Case 16: View recommended Comics
+Use Case 15: View recommended Comics
         User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
 
