@@ -26,6 +26,7 @@ dist-ssr
 #private info
 .env
 playground-1.mongodb.js
+marvel-nexus-keypair.ppk
 
 #Photo uploads
 /uploads

@@ -4,7 +4,7 @@ import "./login.css";
 function Login() {
   // Redirect to the Google OAuth route
   const login = () => {
-    window.location.href = "http://localhost:5000/auth/google"; // have to update the once AWS is up
+    window.location.href = `https://marvel-nexus-env.eba-teusv34s.us-west-2.elasticbeanstalk.com/auth/google`; // have to update the once AWS is up
   };
 
   return (

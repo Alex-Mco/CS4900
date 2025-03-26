@@ -1,5 +1,5 @@
 
-div .content{
+div .content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,12 +29,10 @@ div .content{
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
-
 .profile-picture-container {
   position: relative;
   display: inline-block;
 }
-
 
 .profile-picture {
   width: 130px;
@@ -58,9 +56,8 @@ div .content{
 }
 
 .profile-picture-container:hover .edit-overlay {
-  opacity: 1; 
+  opacity: 1;
 }
-
 
 .edit-overlay {
   position: absolute;
@@ -73,14 +70,12 @@ div .content{
   border-radius: 50px;
   cursor: pointer;
   transition: opacity 0.3s ease-in-out;
-  opacity: 0; /* Hidden by default */
+  opacity: 0; 
 }
-
 
 input[type="file"] {
   display: none;
 }
-
 
 .profile-info {
   font-size: 1rem;
@@ -97,9 +92,8 @@ input[type="file"] {
 
 .profile-info span {
   font-weight: normal;
-  color: #fff;
+  color: #fff; 
 }
-
 
 .profile-input {
   width: 90%;
@@ -113,6 +107,7 @@ input[type="file"] {
   text-align: center;
   outline: none;
 }
+
 .profile-input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }

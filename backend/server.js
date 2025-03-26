@@ -16,7 +16,7 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
+  origin: `${process.env.REACT_APP_FRONT_URL}`, // Frontend URL
   credentials: true, // Allow credentials (cookies) to be sent
 }));
 app.use(express.json()); // For parsing application/json
@@ -49,6 +49,12 @@ app.use(
                 collectionName: 'sessions',
                 ttl: 14 * 24 * 60 * 60, // 14 days
               }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day expiration
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      sameSite: "lax",
+    },
   })
 );
 
@@ -59,6 +65,11 @@ app.use(passport.session());
 // Connect to the database before starting the server
 connectDatabase()
   .then(() => {
+    //test route to make sure the backend is live on AWS
+    app.get('/', (req, res) => {
+      res.send('Backend is live!');
+    });    
+
     // Google OAuth routes
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
@@ -66,16 +77,27 @@ connectDatabase()
       '/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/' }),
       (req, res) => {
-        res.redirect('http://localhost:5173/profile');
+        res.redirect(`${process.env.REACT_APP_FRONT_URL}/profile`);
       }
     );
 
+    app.get("/auth/session", (req, res) => {
+      if (req.isAuthenticated()) {
+        res.json({ isAuthenticated: true, user: req.user });
+      } else {
+        res.json({ isAuthenticated: false });
+      }
+    });
+
+    
     app.get('/logout', (req, res, next) => {
       req.logout((err) => {
         if (err) {
           return next(err);
         }
         req.session.destroy(() => {
+          res.clearCookie("connect.sid"); // Clear session cookie
+          res.json({ message: "Logged out successfully" });
           res.redirect('/');
         });
       });
@@ -101,7 +123,7 @@ connectDatabase()
       }
     
       const { name, email, username } = req.body;
-      const profilePic = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
+      const profilePic = req.file ? `${process.env.REACT_APP_BACK_URL}/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
     
       try {
         const updatedUser = await User.findOneAndUpdate(
@@ -272,10 +294,9 @@ connectDatabase()
     });
 
     // Start server only after connecting to the DB
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => console.log(`Running on ${PORT}`));
+
 
   })
   .catch(err => {
