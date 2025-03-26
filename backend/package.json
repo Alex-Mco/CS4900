@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test:backend": "jest --config jest.config.js --runInBand --detectOpenHandles --forceExit"
   },
   "keywords": [],
@@ -10,6 +11,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.8.4",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
