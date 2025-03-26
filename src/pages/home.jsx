@@ -16,7 +16,7 @@ function HomePage() {
 
   // Fetch user data when the component mounts
   useEffect(() => {
-    axios.get('process.env.REACT_APP_API_URL/profile', { withCredentials: true })
+    axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true })
       .then(response => setUser(response.data))
       .catch(error => console.error('Error fetching user:', error));
   }, []);
