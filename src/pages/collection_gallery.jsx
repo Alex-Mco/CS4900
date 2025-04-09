@@ -8,14 +8,14 @@ function CollectionGallery() {
   const [newCollectionName, setNewCollectionName] = useState('');
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true })
+    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
       .then(response => setUser(response.data))
       .catch(error => console.error('Error fetching user:', error));
   }, []);
 
   const handleAddCollection = () => {
     if (newCollectionName && user) {
-      axios.post(`${process.env.REACT_APP_API_URL}/api/users/${user._id}/collections`, { collectionName: newCollectionName })
+      axios.post(`https://marvel-nexus-backend.click/api/users/${user._id}/collections`, { collectionName: newCollectionName })
         .then(response => {
           setUser(response.data);
           setNewCollectionName(''); 

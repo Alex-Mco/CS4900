@@ -13,7 +13,7 @@ function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true })
+    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
       .then(response => {
         setUser(response.data);
         setName(response.data.name);
@@ -42,7 +42,7 @@ function Profile() {
         formData.append('profilePic', profilePic)
       }
   
-      axios.put(`${process.env.REACT_APP_API_URL}/profile-update`, formData, {
+      axios.put(`https://marvel-nexus-backend.click/profile-update`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

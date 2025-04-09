@@ -16,8 +16,9 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: `${process.env.REACT_APP_FRONT_URL}`, // Frontend URL
+  origin: `${process.env.FRONT_URL}`, // Frontend URL
   credentials: true, // Allow credentials (cookies) to be sent
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
@@ -36,24 +37,36 @@ const storage = multer.diskStorage({
 const upload = multer({storage})
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.set("trust proxy", true); // or 1 for single-hop if needed
+
+// app.use((req, res, next) => {
+//   // Only redirect if it's not secure AND not already being handled by the load balancer
+//   if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
+//     return res.redirect("https://" + req.headers.host + req.url);
+//   }
+//   next();
+// });
+
 // Session setup with MongoDB Atlas store
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: process.env.NODE_ENV === 'test' 
-            ? new session.MemoryStore()  // Use in-memory store for tests
-            : MongoStore.create({ 
-                mongoUrl: process.env.MONGO_URL,
-                collectionName: 'sessions',
-                ttl: 14 * 24 * 60 * 60, // 14 days
-              }),
+    store:
+      process.env.NODE_ENV === "test"
+        ? new session.MemoryStore()
+        : MongoStore.create({
+            mongoUrl: process.env.MONGO_URL,
+            collectionName: "sessions",
+            ttl: 14 * 24 * 60 * 60,
+          }),
+    proxy: true,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day expiration
+      maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Set to true in production
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     },
   })
 );
@@ -77,11 +90,31 @@ connectDatabase()
       '/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/' }),
       (req, res) => {
-        res.redirect(`${process.env.REACT_APP_FRONT_URL}/profile`);
+        console.log("✅ Authenticated User:", req.user);
+        console.log("🧠 Session ID:", req.sessionID);
+        res.send(`
+          <html>
+            <head>
+              <title>Logging you in...</title>
+              <script>
+                // Delay a bit to let the cookie persist before redirect
+                setTimeout(() => {
+                  window.location.href = "${process.env.FRONT_URL}/?redirect=profile";
+                }, 200);
+              </script>
+            </head>
+            <body>
+              Logging you in... please wait.
+            </body>
+          </html>
+        `);
       }
     );
-
+    
     app.get("/auth/session", (req, res) => {
+      console.log("Headers:", req.headers);
+      console.log("X-Forwarded-Proto:", req.headers["x-forwarded-proto"]);
+      console.log("req.secure:", req.secure);
       if (req.isAuthenticated()) {
         res.json({ isAuthenticated: true, user: req.user });
       } else {
@@ -123,7 +156,7 @@ connectDatabase()
       }
     
       const { name, email, username } = req.body;
-      const profilePic = req.file ? `${process.env.REACT_APP_BACK_URL}/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
+      const profilePic = req.file ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : req.body.profilePic || "/default-profile-pic.jpg";
     
       try {
         const updatedUser = await User.findOneAndUpdate(

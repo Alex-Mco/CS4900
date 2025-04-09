@@ -1,29 +1,28 @@
 #root{
   width: 100vw;
-  background-color: #fff;
+  overflow-x: hidden;
 }
 
 body {
-  margin-top: 60px;
-  width: 100%;
-  min-height: 100vh; 
+  padding: 0;
+  margin-top: 60px;  
   font-family: Arial, sans-serif;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f4f4f9;
   display: flex;
-  background-color: #fff;
   justify-content: center;
   align-items: center;
-  height: auto !important;
-}
-
-#login-div{
-  display: flex;
   min-height: 100vh; 
   height: 100vh;
 }
-
+p{
+  color:black;
+}
 .googleLogIn {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px;
+  padding: 20px;
 }

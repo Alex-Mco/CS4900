@@ -18,7 +18,7 @@ function ExplorePage() {
 
   // Fetch user data when the component mounts
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true })
+    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
       .then(response => setUser(response.data))
       .catch(error => console.error('Error fetching user:', error));
   }, []);
@@ -29,7 +29,7 @@ function ExplorePage() {
   };
 
   const getSearchConfig = (type, offsetValue) => {
-    let url = `${process.env.REACT_APP_API_URL}/api/search`;
+    let url = `https://marvel-nexus-backend.click/api/search`;
     let params = { offset: offsetValue };
 
     if (type === "title") {
@@ -37,11 +37,11 @@ function ExplorePage() {
       params.title = searchQuery;
     } else if (type === "character") {
       // Call a dedicated endpoint for character search; backend should handle
-      url = `${process.env.REACT_APP_API_URL}/api/search/character`;
+      url = `https://marvel-nexus-backend.click/api/search/character`;
       params.name = searchQuery;
     } else if (type === "series") {
       // Call a dedicated endpoint for series search; backend should handle
-      url = `${process.env.REACT_APP_API_URL}/api/search/series`;
+      url = `https://marvel-nexus-backend.click/api/search/series`;
       params.series = searchQuery;
     }
     return { url, params };
@@ -68,7 +68,7 @@ function ExplorePage() {
     setLoading(true);
     try {
       const newOffset = offset + 20; 
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/search`, {
+      const response = await axios.get(`https://marvel-nexus-backend.click/api/search`, {
         params: { title: searchQuery, offset: newOffset },
       });
       setComics(response.data.results);
@@ -87,7 +87,7 @@ function ExplorePage() {
       setLoading(true);
       try {
         const newOffset = offset - 20;
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/search`, {
+        const response = await axios.get(`https://marvel-nexus-backend.click/api/search`, {
           params: { title: searchQuery, offset: newOffset },
         });
         setComics(response.data.results);
@@ -133,7 +133,7 @@ function ExplorePage() {
       };
 
       try {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
+        await axios.post(`https://marvel-nexus-backend.click/api/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
         alert("Comic added to collection!");
         setSelectedComic(null);
         setSelectedCollection(null);
