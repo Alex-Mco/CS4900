@@ -8,9 +8,6 @@ const Navbar = () => {
       <div className="title">Marvel Nexus</div>
       <ul className="nav-links">
         <li>
-          <Link to="/home" className="nav-link">Home</Link>
-        </li>
-        <li>
           <Link to="/explore" className="nav-link">Explore</Link>
         </li>
         <li>

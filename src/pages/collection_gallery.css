@@ -6,16 +6,19 @@
   flex-direction: column;
   align-items: center;
 }
+
 h1{
   font-size: 2.5rem;
   margin-bottom: 0px;
   color: #e62429;
 }
+
 .collection-container{
   display: flex;
   flex-wrap: wrap; 
   justify-content: center;
 }
+
 .collection-cards {
   display: flex;
   flex-wrap: wrap; 

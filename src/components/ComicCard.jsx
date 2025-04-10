@@ -5,7 +5,7 @@ const ComicCard = ({ comic, onSelect, showRemoveButton = false, onRemove }) => {
   return (
     <div className="comic-cards" onClick={() => onSelect(comic)}> 
       <img
-        src={`${comic.thumbnail.path}.${comic.thumbnail.extension}`}
+        src={`${comic.thumbnail.path.replace(/^http:/, 'https:')}.${comic.thumbnail.extension}`}
         alt={comic.title}
         className="comic-thumbnail"
       />

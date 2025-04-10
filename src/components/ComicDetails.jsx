@@ -19,20 +19,20 @@ const ComicDetails = ({
         
         <div className="comic-header">
           <img
-            src={`${comic.thumbnail?.path}.${comic.thumbnail?.extension}`}
+            src={`${comic.thumbnail.path.replace(/^http:/, 'https:')}.${comic.thumbnail.extension}`}
             alt={comic.title}
             className="comic-image"
           />
           <h2>{comic.title}</h2>
         </div>
 
-        <p><strong>Creators:</strong> 
+        <p className="comicDets"><strong>Creators:</strong> 
           {comic.creators?.items?.length > 0 
             ? comic.creators.items.map(c => c.name).join(", ") 
             : "Unknown"}
         </p>
-        <p><strong>Description:</strong> {comic.description || "No description available."}</p>
-        <p><strong>Series: </strong> {comic.series?.name || "Unknown"}</p>
+        <p className="comicDets"><strong>Description:</strong> {comic.description || "No description available."}</p>
+        <p className="comicDets"><strong>Series: </strong> {comic.series?.name || "Unknown"}</p>
 
         {/* Collection Selection Section (Only show if collections exist) */}
         {userCollections.length > 0 && (

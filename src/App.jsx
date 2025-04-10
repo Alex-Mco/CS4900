@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
-import Home from "./pages/home";
 import Profile from "./pages/profile";
 import Navbar from "./components/navbar";
 import CollectionGallery from "./pages/collection_gallery";
@@ -51,7 +50,6 @@ function App() {
           <Routes>
             {/* Conditionally render profile or login directly */}
             <Route path="/" element={isAuthenticated ? <Profile /> : <Login />} />
-            <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
             <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
             <Route path="/collections" element={<ProtectedRoute element={<CollectionGallery />} />} />
             <Route path="/explore" element={<ProtectedRoute element={<Explore />} />} />
