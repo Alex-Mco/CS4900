@@ -5,6 +5,8 @@
 Using marvel content under the fair use law for eductional purposes. I am making no money off this website and all Marvel comics and Marvel symbols belong to Marvel©.
 Marvel Nexus is a web application designed with the comic enthusiast in mind. It is a website that allows the user to track and manage comics. It browses the marvel api for comics kept in their database and returns the information in an easy to read and view format. Allowing users to select comics while browsing to add to their own personal collecions to keep track of comics they own, comics they want, or even just their favorites. 
 
+## [Public Access URL](https://marvel-nexus.com)
+
 ## Installation & Setup
 
 ### Prerequisites:
