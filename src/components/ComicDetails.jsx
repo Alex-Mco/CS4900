@@ -1,5 +1,5 @@
 import React from "react";
-import "./ComicDetails.css";
+import "./css/ComicDetails.css";
 
 const ComicDetails = ({ 
   comic, 

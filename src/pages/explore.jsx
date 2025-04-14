@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./explore.css";
+import "./css/explore.css";
 import ComicDetail from "../components/ComicDetails.jsx";
 import ComicCard from "../components/ComicCard";
 

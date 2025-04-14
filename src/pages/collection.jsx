@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './collection.css';
+import './css/collection.css';
 import ComicCard from "../components/ComicCard";
 import ComicDetail from "../components/ComicDetails.jsx";
 
@@ -46,16 +46,6 @@ function CollectionPage() {
         });
     }
   };
-  
-  const handleDeleteCollection = () => {
-    if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
-      axios.delete(`https://marvel-nexus-backend.click/api/users/collections/${id}`)
-        .then(() => {
-          navigate("/collections");
-        })
-        .catch(error => console.error('Error deleting collection:', error));
-    }
-  };
 
   return (
     <div className="collection-page">
@@ -64,12 +54,9 @@ function CollectionPage() {
         <div>
           <div className="header-container">
             <Link to="/collections">
-              <button>Back to Collections</button>
+              <button className="back-button">Back to Collections</button>
             </Link>
             <h1 className="collection-title">{collection.collectionName}</h1>
-            <button className="delete-btn" onClick={() => handleDeleteCollection(collection._id)}>
-              Delete Collection
-            </button>
           </div>
           
           <div className="comics-cards">

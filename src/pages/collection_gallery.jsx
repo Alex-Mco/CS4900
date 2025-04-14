@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import './collection_gallery.css'; 
+import './css/collection_gallery.css';
+import CollectionCard from '../components/CollectionCard'; 
 
 function CollectionGallery() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,16 @@ function CollectionGallery() {
     }
   };
 
+  const handleDeleteCollection = (id) => {
+    if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
+      axios.delete(`https://marvel-nexus-backend.click/api/users/collections/${id}`)
+        .then(() => {
+          setUser(response.data);
+        })
+        .catch(error => console.error('Error deleting collection:', error));
+    }
+  };
+
   return (
     <div className="collection-gallery">
       <h1>Collections</h1>
@@ -39,18 +50,20 @@ function CollectionGallery() {
             <button onClick={handleAddCollection}>Add Collection</button>
           </div>
 
+
           <div className="collection-cards">
-            {user.collections.map((collection) => (
-              <Link
-                key={collection._id}
-                to={`/collection/${collection._id}`}
-                className="collection-card"
-              >
-                <div className="card-content">
-                  <h3>{collection.collectionName}</h3>
-                </div>
-              </Link>
-            ))}
+            {user?.collections?.length > 0 ? (
+              user.collections.map((collection) => (
+                <CollectionCard
+                  key={collection._id}
+                  id={collection._id}
+                  name={collection.collectionName}
+                  comicCount={collection.comics?.length || 0}
+                  onDelete={handleDeleteCollection}
+                />
+              ))) : (
+                <p>No collections yet.</p>
+            )}
           </div>
         </div>
       ) : (
@@ -60,4 +73,6 @@ function CollectionGallery() {
   );
 }
 
+
 export default CollectionGallery;
+

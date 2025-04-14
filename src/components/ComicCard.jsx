@@ -1,5 +1,5 @@
 import React from "react";
-import "./ComicCard.css";
+import "./css/ComicCard.css";
 
 const ComicCard = ({ comic, onSelect, showRemoveButton = false, onRemove }) => {
   return (

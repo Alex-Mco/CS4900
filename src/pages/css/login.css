@@ -1,0 +1,36 @@
+#root{
+  width: 100vw;
+  background-color: #fff;
+}
+
+body {
+  margin-top: 60px;
+  width: 100%;
+  min-height: 100vh; 
+  font-family: Arial, sans-serif;
+  display: flex;
+  background-color: #fff;
+  justify-content: center;
+  align-items: center;
+  height: auto !important;
+}
+
+#login-div{
+  display: flex;
+  min-height: 100vh; 
+  flex-direction: column;
+  align-items: center;
+}
+
+#login-header{
+ align-self: center;
+}
+#login-text{
+  color:#151515;
+}
+.googleLogIn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
