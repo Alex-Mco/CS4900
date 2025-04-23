@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema({
     required: false,
   },
   collections: [collectionSchema],
+  favorites: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comic'
+  }],
 });
 
 const User = mongoose.model('User', userSchema);

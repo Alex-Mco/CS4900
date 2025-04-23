@@ -15,6 +15,14 @@ body {
   height: auto !important;
 }
 
+h1{
+  font-size: 2.5rem;
+  margin-bottom: 0px;
+  color: #e62429;
+}
+.login-p{
+  color:black;
+}
 #login-div{
   display: flex;
   min-height: 100vh; 
@@ -30,6 +38,7 @@ body {
 }
 .googleLogIn {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 5px;

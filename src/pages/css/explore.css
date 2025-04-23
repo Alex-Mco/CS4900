@@ -48,6 +48,48 @@
   color: #151515; 
 }
 
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-wrapper input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.suggestion-list {
+  position: absolute;
+  top: 100%; /* Places it just below the input */
+  left: 0;
+  right: 0;
+  background-color: white;
+  color: black;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-top: none;
+  z-index: 999;
+}
+
+.suggestion-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-list li:hover {
+  background-color: #f0f0f0;
+}
+
 .comic-container {
   display: flex;
   flex-wrap: wrap;
@@ -55,6 +97,15 @@
   width: 90%;
   gap: 20px; 
 }
+
+.comic-count {
+  text-align: center;
+  font-size: 16px;
+  color: #151515;
+  margin: 10px 0;
+}
+
+
 
 .pagination{
   gap: 10px;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './css/collection_gallery.css';
 import CollectionCard from '../components/CollectionCard'; 
@@ -9,14 +8,14 @@ function CollectionGallery() {
   const [newCollectionName, setNewCollectionName] = useState('');
 
   useEffect(() => {
-    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_API_URL}/profile`, { withCredentials: true })
       .then(response => setUser(response.data))
       .catch(error => console.error('Error fetching user:', error));
   }, []);
 
   const handleAddCollection = () => {
     if (newCollectionName && user) {
-      axios.post(`https://marvel-nexus-backend.click/api/users/${user._id}/collections`, { collectionName: newCollectionName })
+      axios.post(`${import.meta.env.VITE_API_URL}/api/users/${user._id}/collections`, { collectionName: newCollectionName })
         .then(response => {
           setUser(response.data);
           setNewCollectionName(''); 
@@ -27,7 +26,7 @@ function CollectionGallery() {
 
   const handleDeleteCollection = (id) => {
     if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
-      axios.delete(`https://marvel-nexus-backend.click/api/users/collections/${id}`)
+      axios.delete(`${import.meta.env.VITE_API_URL}/api/users/collections/${id}`)
         .then(() => {
           setUser(response.data);
         })

@@ -1,5 +1,4 @@
 import React from "react";
-import { vi } from 'vitest';
 import { render, screen, fireEvent } from "@testing-library/react";
 import Login from "../pages/Login";
 import '@testing-library/jest-dom';
@@ -29,6 +28,6 @@ describe("Login Component", () => {
     const button = screen.getByRole("button", { name: /log in with google/i });
     fireEvent.click(button);
     
-    expect(window.location.href).toBe("http://localhost:5000/auth/google");
+    expect(window.location.href).toBe("http://localhost:8080/auth/google");
   });
 });

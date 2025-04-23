@@ -105,7 +105,7 @@ describe("CollectionPage Component", () => {
     // Ensure Axios DELETE request was called
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith(
-        "http://localhost:5000/api/users/collections/1/comics/101"
+        "http://localhost:8080/api/users/collections/1/comics/101"
       );
     });
 
@@ -138,7 +138,7 @@ describe("CollectionPage Component", () => {
     // Ensure Axios DELETE request was called for the collection
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith(
-        "http://localhost:5000/api/users/collections/1"
+        "http://localhost:8080/api/users/collections/1"
       );
     });
 

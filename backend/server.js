@@ -20,7 +20,30 @@ app.use(cors({
   credentials: true, // Allow credentials (cookies) to be sent
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
-app.use(express.json()); // For parsing application/json
+
+app.use(express.json({
+  strict: true,
+  verify: (req, res, buf) => {
+    const contentType = req.headers['content-type'] || '';
+    if (!contentType.includes('application/json')) return;
+
+    try {
+      JSON.parse(buf);
+    } catch (err) {
+      const preview = buf.toString().slice(0, 100);
+      console.warn(`[JSON ERROR] From ${req.ip}: ${preview}`);
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+
+app.use((err, req, res, next) => {
+  if (err.message === 'Invalid JSON') {
+    console.warn("Invalid JSON received from:", req.ip);
+    return res.status(400).json({ error: "Malformed JSON" });
+  }
+  next(err);
+}); // For parsing application/json
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
 // File upload setup
@@ -39,13 +62,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.set("trust proxy", true); // or 1 for single-hop if needed
 
-// app.use((req, res, next) => {
-//   // Only redirect if it's not secure AND not already being handled by the load balancer
-//   if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
-//     return res.redirect("https://" + req.headers.host + req.url);
-//   }
-//   next();
-// });
+const isProduction = process.env.NODE_ENV === 'production';
+const isTest = process.env.NODE_ENV === 'test';
 
 // Session setup with MongoDB Atlas store
 app.use(
@@ -53,20 +71,19 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store:
-      process.env.NODE_ENV === "test"
-        ? new session.MemoryStore()
-        : MongoStore.create({
-            mongoUrl: process.env.MONGO_URL,
-            collectionName: "sessions",
-            ttl: 14 * 24 * 60 * 60,
-          }),
-    proxy: true,
+    store: isTest
+      ? new session.MemoryStore()
+      : MongoStore.create({
+          mongoUrl: process.env.MONGO_URL,
+          collectionName: 'sessions',
+          ttl: 14 * 24 * 60 * 60, // 14 days
+        }),
+    proxy: isProduction, // trust proxy only in production
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction, // secure cookies only in production
+      sameSite: isProduction ? 'none' : 'lax',
     },
   })
 );
@@ -90,8 +107,6 @@ connectDatabase()
       '/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/' }),
       (req, res) => {
-        console.log("✅ Authenticated User:", req.user);
-        console.log("🧠 Session ID:", req.sessionID);
         res.send(`
           <html>
             <head>
@@ -112,9 +127,6 @@ connectDatabase()
     );
     
     app.get("/auth/session", (req, res) => {
-      console.log("Headers:", req.headers);
-      console.log("X-Forwarded-Proto:", req.headers["x-forwarded-proto"]);
-      console.log("req.secure:", req.secure);
       if (req.isAuthenticated()) {
         res.json({ isAuthenticated: true, user: req.user });
       } else {
@@ -122,19 +134,34 @@ connectDatabase()
       }
     });
 
-    
     app.get('/logout', (req, res, next) => {
-      req.logout((err) => {
+      if (!req.isAuthenticated()) {
+        return res.status(200).json({ message: "No active session" });
+      }
+    
+      req.logout(err => {
         if (err) {
-          return next(err);
+          console.error("Logout error:", err);
+          return res.status(500).json({ error: "Logout failed" });
         }
-        req.session.destroy(() => {
-          res.clearCookie("connect.sid"); // Clear session cookie
-          res.json({ message: "Logged out successfully" });
-          res.redirect('/');
+    
+        req.session.destroy(destroyErr => {
+          if (destroyErr) {
+            console.error("Session destroy error:", destroyErr);
+            return res.status(500).json({ error: "Failed to destroy session" });
+          }
+    
+          // clear cookie first before sending the response
+          res.clearCookie("connect.sid", {
+            path: "/",
+            sameSite: "none",
+            secure: true,
+          });
+    
+          return res.status(200).json({ message: "Logged out successfully" });
         });
       });
-    });
+    });    
     
     //Test routes
     app.use('/auth/test', testRoutes);
@@ -181,7 +208,7 @@ connectDatabase()
       const publicKey = process.env.MARVEL_PUBLIC_KEY;
       return md5(timestamp + privateKey + publicKey);
     }
-    
+
     //Comic Title Search Endpoint
     app.get("/api/search", async (req, res) => {
       const searchQuery = req.query.title;
@@ -302,24 +329,31 @@ connectDatabase()
           return res.json({ results: [], total: 0 });
         }
     
-        // Use the first matching series' ID
-        const seriesId = seriesResponse.data.data.results[0].id;
-    
-        // Now fetch comics for that series
-        const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics`, {
-          params: {
-            apikey: process.env.MARVEL_PUBLIC_KEY,
-            ts: timestamp,
-            hash: hash,
-            offset: offset,
-            limit: limit,
-          },
-        });
-    
+        const matchingSeries = seriesResponse.data.data.results;
+
+        const allComics = [];
+        let totalAvailable = 0;
+        for (const series of matchingSeries) {
+          const seriesId = series.id;
+
+          const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics`, {
+            params: {
+              apikey: process.env.MARVEL_PUBLIC_KEY,
+              ts: timestamp,
+              hash: hash,
+              offset: 0, // optional: customize per series
+              limit: 10  // optional: limit per series to avoid hitting API limit
+            },
+          });
+          totalAvailable += comicsResponse.data.data.total;
+          allComics.push(...comicsResponse.data.data.results);
+        }
+
         res.json({
-          results: comicsResponse.data.data.results,
-          total: comicsResponse.data.data.total,
+          results: allComics,
+          total: totalAvailable,
         });
+
       } catch (error) {
         console.error("Error fetching comics by series from Marvel API:", error);
         res.status(500).json({ error: "Failed to fetch comics by series" });
@@ -335,6 +369,14 @@ connectDatabase()
   .catch(err => {
     console.error('Error connecting to the database:', err);
     process.exit(1); // Exit the process if database connection fails
+  });
+
+  // After all your routes
+  app.use((err, req, res, next) => {
+    console.error("Unhandled error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Internal server error" });
+    }
   });
 
 module.exports = app; // Export the app for testing

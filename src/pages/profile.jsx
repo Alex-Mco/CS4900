@@ -13,7 +13,7 @@ function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_API_URL}/profile`, { withCredentials: true })
       .then(response => {
         setUser(response.data);
         setName(response.data.name);
@@ -42,7 +42,7 @@ function Profile() {
         formData.append('profilePic', profilePic)
       }
   
-      axios.put(`https://marvel-nexus-backend.click/profile-update`, formData, {
+      axios.put(`${import.meta.env.VITE_API_URL}/profile-update`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -77,7 +77,7 @@ function Profile() {
         <h1>Profile</h1>
         {user ? (
           <div className="profile-container">
-            <p>{isEditing ? (
+            <div>{isEditing ? (
                 <div className="profile-picture-container">
                 <label htmlFor="profilePic" className="hidden-label">Profile Picture</label>
                   <img
@@ -95,7 +95,7 @@ function Profile() {
                   </div>
                 ) : (
                   <img src={user.profilePic} alt="Profile" className="profile-picture" />
-                )}</p>
+                )}</div>
             <p className="profile-info">Name: <span>{isEditing ? (
               <input
                 type="text"

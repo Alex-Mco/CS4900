@@ -33,12 +33,9 @@ const comicSchema = new mongoose.Schema({
     name: { type: String, required: false },
     resourceURI: { type: String, default: "" }
   },
-  variant: {
-    type: Boolean,
-  },
   pgCount: {
     type: Number, 
-  }
+  },
 });
 
 const Comic = mongoose.model('Comic', comicSchema);

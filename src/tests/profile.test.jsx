@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Profile from '../pages/profile';
 import axios from 'axios';
 import { vi } from 'vitest';
-import { act } from 'react-dom/test-utils';
+import { act } from "react";
 import '@testing-library/jest-dom';
 
 vi.mock('axios'); // Mock axios

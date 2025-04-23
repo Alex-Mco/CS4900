@@ -148,6 +148,71 @@ router.post('/:userId/collections/:collectionId/comics', async (req, res) => {
   }
 });
 
+//Add a comic to multiple collections
+// Add a comic to multiple collections at once
+router.post('/:userId/comics/add-to-collections', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { collectionIds, comic } = req.body;
+
+    if (!Array.isArray(collectionIds) || collectionIds.length === 0) {
+      return res.status(400).json({ msg: 'No collections provided' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    // Check if comic already exists in DB by title + issueNumber (to avoid dupes)
+    let existingComic = await Comic.findOne({
+      title: comic.title,
+      issueNumber: comic.issueNumber
+    });
+
+    if (!existingComic) {
+      const formattedCreators = Array.isArray(comic.creators)
+        ? { items: comic.creators.map(c => ({ role: c.role || "Unknown", name: c.name || "Unknown" })) }
+        : { items: [] };
+
+      const formattedSeries = comic.series && typeof comic.series === "object"
+        ? { name: comic.series.name, resourceURI: comic.series.resourceURI || "" }
+        : { name: comic.series || "Unknown", resourceURI: "" };
+
+      const newComic = new Comic({
+        title: comic.title,
+        issueNumber: comic.issueNumber,
+        creators: formattedCreators,
+        description: comic.description || "No description available",
+        thumbnail: comic.thumbnail,
+        series: formattedSeries,
+        variant: comic.variant || "",
+        pgCount: comic.pgCount || 0,
+      });
+
+      existingComic = await newComic.save();
+    }
+
+    const comicId = existingComic._id;
+
+    // Add the comic to each collection (if it's not already there)
+    let updatedCollections = [];
+    user.collections.forEach(col => {
+      if (collectionIds.includes(col._id.toString())) {
+        if (!col.comics.some(id => id.toString() === comicId.toString())) {
+          col.comics.push(comicId);
+        }
+        updatedCollections.push(col.collectionName);
+      }
+    });
+
+    await user.save();
+    res.json({ msg: `Comic added to: ${updatedCollections.join(", ")}`, comicId });
+  } catch (err) {
+    console.error('Error adding comic to multiple collections:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+
 // Delete comic from a collection
 router.delete('/collections/:collectionId/comics/:comicId', async (req, res) => {
   try {
@@ -228,6 +293,92 @@ router.delete('/collections/:collectionId', async (req, res) => {
   } catch (error) {
     console.error('Error deleting collection:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+//toggle favorite comics and add it to database if needed
+router.post('/:userId/favorites/:comicId', async (req, res) => {
+  try {
+    const { userId, comicId } = req.params;
+    const comicData = req.body; // frontend sends full comic info
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    let comic;
+
+    // Try to find by _id first (if it's a valid ObjectId)
+    if (mongoose.Types.ObjectId.isValid(comicId)) {
+      comic = await Comic.findById(comicId);
+    }
+
+    // If not found, create it from scratch (like collection add)
+    if (!comic) {
+      const formattedCreators = Array.isArray(comicData.creators?.items)
+        ? { items: comicData.creators.items.map(creator => ({
+            role: creator.role || "Unknown",
+            name: creator.name || "Unknown",
+          })) }
+        : { items: [] };
+
+      const formattedSeries = comicData.series && typeof comicData.series === "object"
+        ? { name: comicData.series.name, resourceURI: comicData.series.resourceURI || "" }
+        : { name: comicData.series || "Unknown", resourceURI: "" };
+
+      comic = new Comic({
+        title: comicData.title,
+        issueNumber: comicData.issueNumber || "N/A",
+        description: comicData.description || "No description available",
+        thumbnail: comicData.thumbnail,
+        series: formattedSeries,
+        creators: formattedCreators,
+        variant: comicData.variant || "",
+        pgCount: comicData.pageCount || 0,
+      });
+
+      await comic.save();
+    }
+
+    // Toggle the comic in favorites
+    const comicObjectId = comic._id;
+    const alreadyFavorite = user.favorites.some(id => id.equals(comicObjectId));
+
+    if (alreadyFavorite) {
+      user.favorites.pull(comicObjectId);
+    } else {
+      user.favorites.push(comicObjectId);
+    }
+
+    await user.save();
+    res.json({ favorites: user.favorites });
+  } catch (err) {
+    console.error('Error toggling favorite:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// retrieve users favorite comics
+router.get('/:userId/favorites', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ msg: 'Invalid user ID format' });
+    }
+
+    const user = await User.findById(userId).populate({
+      path: 'favorites',
+      populate: { path: 'creators' }, // Optional: if you want creator details
+    });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json(user.favorites);
+  } catch (err) {
+    console.error('Error fetching favorites:', err);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 

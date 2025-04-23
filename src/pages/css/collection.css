@@ -1,4 +1,4 @@
-.collection-page{
+.collection-page {
   width: 100%;
   display: flex;
   min-height: 100vh;
@@ -8,19 +8,16 @@
 .header-container {
   position: relative;
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 100px;
+  justify-content: space-between;
+  padding: 20px;
+  height: 80px;
   margin-bottom: 20px;
 }
 
-.header-container .back-button {
-  position: absolute;
-  left: 40px;
-}
-
-.header-container button {
-  margin: 0;
+/* Buttons */
+.back-button,
+.delete-button {
   padding: 10px 15px;
   font-size: 16px;
   background-color: #e62429;
@@ -28,26 +25,34 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  position: absolute;
-  left: 40px;
-  top: 50%;
-  transform: translateY(-50%);
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+  z-index: 1;
 }
 
-.header-container button:hover {
-  background-color: #c6a972; 
+.back-button:hover,
+.delete-button:hover {
+  background-color: #c6a972;
 }
 
+/* Centered Title Trick */
 .collection-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.5rem;
+  color: #e62429;
   margin: 0;
-  text-align: center;
+  pointer-events: none;
 }
-.add-container{
+
+/* Grid */
+.add-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100px;
-  margin-bottom: 20px
+  margin-bottom: 20px;
 }
 
 .comics-cards {
@@ -68,9 +73,39 @@
   text-align: center;
   color: #fff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow-y:scroll;
+  overflow-y: scroll;
 }
 
-.comic-card h3{
+.comic-card h3 {
   color: #e62429;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .collection-title {
+    font-size: 1.8rem;
+  }
+
+  .back-button,
+  .delete-button {
+    font-size: 0;
+    padding: 8px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-button::before {
+    content: "←";
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .delete-button::before {
+    content: "🗑";
+    font-size: 28px;
+    font-weight: bold;
+  }
 }

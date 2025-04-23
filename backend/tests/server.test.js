@@ -54,7 +54,7 @@ describe('Authenticated Server API tests', () => {
 
     test('should logout user', async () => {
         const res = await agent.get('/logout');
-        expect(res.status).toBe(302); 
+        expect(res.status).toBe(200); 
 
         const afterLogout = await agent.get('/profile');
         expect(afterLogout.status).toBe(401);

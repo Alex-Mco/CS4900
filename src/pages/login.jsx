@@ -8,10 +8,10 @@ function Login() {
   };
 
   return (
-    <div>
+    <div className="googleLogIn">
       <h1>Login</h1>
-      <p>Please log in using your Google account:</p>
-      <div className="googleLogIn">
+      <p className="login-p">Please log in using your Google account:</p>
+      <div>
         <button onClick={login} className="login-button">
           Log in with Google
         </button>

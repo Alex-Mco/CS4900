@@ -1,45 +1,138 @@
 .navbar {
-  position: fixed; 
+  position: fixed;
   top: 0;
-  left: 0;
   width: 100%;
-  height: 60px; 
-  background-color: #151515; 
-  color: #fff; 
+  background-color: #151515;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  padding: 0 20px;
+}
+
+.nav-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  margin-right: 40px;
+  flex-wrap: nowrap; /* ✅ Prevent wrapping */
+}
+
+/* Title + hamburger area */
+.left-section {
   display: flex;
   align-items: center;
-  justify-content: space-around; 
-  z-index: 1000;
+  gap: 10px;
 }
 
 .title {
   font-size: 1.5rem;
   font-weight: bold;
+  white-space: nowrap;
 }
 
-.nav-links {
-  list-style: none;
+/* Hide hamburger on desktop */
+.hamburger {
+  font-size: 26px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: none;
+}
+
+.hamburger:focus,
+.hamburger:hover {
+  background: none;
+  color: white;
+}
+
+/* Desktop nav links aligned to the right */
+.nav-links.desktop {
   display: flex;
+  gap: 20px;
+  list-style: none;
+  align-items: center;
   margin: 0;
   padding: 0;
-  color: #fff;
+  flex-wrap: nowrap;      /* ✅ Prevent link wrapping */
+  white-space: nowrap;    /* ✅ Prevent word-breaks */
 }
 
-.nav-links li {
-  margin-left: 20px;
-  cursor: pointer;
+.nav-links.desktop li {
+  flex-shrink: 0; /* ✅ Prevent links from shrinking into tiny buttons */
 }
 
-.nav-links li:hover {
-  text-decoration: underline;
-}
-
-.nav-links a {
+.nav-links.desktop li a,
+.nav-links.desktop li button {
+  color: white;
   text-decoration: none;
-  color: inherit; 
-  font-weight: normal; 
+  font-size: 18px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 
-.nav-links a:hover {
-  text-decoration: underline; 
+.nav-links.desktop li a:hover,
+.nav-links.desktop li button:hover {
+  background-color: #2c2c2c;
+}
+
+/* Logout button styling */
+.logout-button {
+  background: transparent;
+  border: 1px solid #e62429;
+  color: #e62429;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background-color: #e62429;
+  color: white;
+}
+
+/* Mobile-only styles */
+@media (max-width: 600px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links.desktop {
+    display: none;
+  }
+
+  .title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    pointer-events: none;
+  }
+
+  .nav-links.mobile {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #1e1e1e;
+    width: 100%;
+  }
+
+  .nav-links.mobile li a,
+  .nav-links.mobile li button {
+    padding: 12px 20px;
+    color: white;
+    text-align: left;
+    display: block;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    font-size: 14px;
+  }
 }

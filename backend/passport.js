@@ -92,6 +92,4 @@ passport.deserializeUser(async (googleId, done) => {
   }
 });
 
-
-
 module.exports = passport;

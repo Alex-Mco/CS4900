@@ -16,7 +16,7 @@ function CollectionPage() {
 
   useEffect(() => {
     // Fetch the collection details
-    axios.get(`https://marvel-nexus-backend.click/api/users/collections/${id}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/users/collections/${id}`)
       .then(response => setCollection(response.data))
       .catch(error => console.error('Error fetching collection:', error));
   }, [id]);
@@ -24,7 +24,7 @@ function CollectionPage() {
   const handleRemoveComic = (comicId) => {
     if (window.confirm("Are you sure you want to delete this comic from the collection?")) {
       axios
-        .delete(`https://marvel-nexus-backend.click/api/users/collections/${id}/comics/${comicId}`)
+        .delete(`${import.meta.env.VITE_API_URL}/api/users/collections/${id}/comics/${comicId}`)
         .then(() => {
           console.log("Comic successfully removed from backend");
           // Filter out the removed comic manually
@@ -47,6 +47,16 @@ function CollectionPage() {
     }
   };
 
+  const handleDeleteCollection = () => {
+    if (window.confirm("Are you sure you want to delete this collection? All comics inside will be removed.")) {
+      axios.delete(`${import.meta.env.VITE_API_URL}/api/users/collections/${id}`)
+        .then(() => {
+          navigate("/collections");
+        })
+        .catch(error => console.error('Error deleting collection:', error));
+    }
+  };
+
   return (
     <div className="collection-page">
       {error && <p role="alert">{error}</p>}
@@ -57,6 +67,9 @@ function CollectionPage() {
               <button className="back-button">Back to Collections</button>
             </Link>
             <h1 className="collection-title">{collection.collectionName}</h1>
+            <button className="delete-button" onClick={() => handleDeleteCollection(collection._id)}>
+              Delete Collection
+            </button>
           </div>
           
           <div className="comics-cards">

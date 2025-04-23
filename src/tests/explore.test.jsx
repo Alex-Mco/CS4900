@@ -7,6 +7,13 @@ import '@testing-library/jest-dom';
 
 vi.mock("axios");
 
+Object.defineProperty(global.window, 'scrollTo', {
+  value: () => {},
+  writable: true,
+});
+
+global.alert = vi.fn(); // or jest.fn() if using Jest
+
 describe("ExplorePage Component", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -75,7 +82,7 @@ describe("ExplorePage Component", () => {
   
     // Ensure API was called correctly
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("http://localhost:5000/api/search", {
+      expect(axios.get).toHaveBeenCalledWith("http://localhost:8080/api/search", {
         params: { title: "Spider-Man", offset: 0 },
       });
     });
@@ -155,7 +162,7 @@ describe("ExplorePage Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
 
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("http://localhost:5000/api/search", {
+      expect(axios.get).toHaveBeenCalledWith("http://localhost:8080/api/search", {
         params: { title: "Iron Man", offset: 20 },
       });
     });
@@ -208,7 +215,7 @@ describe("ExplorePage Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Confirm/i }));
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith("http://localhost:5000/api/users/123/collections/abc/comics", expect.any(Object));
+      expect(axios.post).toHaveBeenCalledWith("http://localhost:8080/api/users/123/collections/abc/comics", expect.any(Object));
     });
   });
 

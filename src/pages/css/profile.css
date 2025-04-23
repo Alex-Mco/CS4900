@@ -58,7 +58,6 @@
   opacity: 1; 
 }
 
-
 .edit-overlay {
   position: absolute;
   bottom: 5px;
@@ -70,14 +69,13 @@
   border-radius: 50px;
   cursor: pointer;
   transition: opacity 0.3s ease-in-out;
-  opacity: 0; /* Hidden by default */
+  opacity: 0;
 }
 
 
 input[type="file"] {
   display: none;
 }
-
 
 .profile-info {
   font-size: 1rem;

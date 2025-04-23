@@ -9,18 +9,26 @@ function ExplorePage() {
   const [comics, setComics] = useState([]); 
   const [loading, setLoading] = useState(false); 
   const [offset, setOffset] = useState(0);
-  const [totalComics, setTotalComics] = useState(0);
+  const [total, setTotalComics] = useState(0);
   const [selectedComic, setSelectedComic] = useState(null);
   const [user, setUser] = useState(null); // To hold user data
-  const [selectedCollection, setSelectedCollection] = useState(null); // To track selected collection
+  const [selectedCollections, setSelectedCollections] = useState(new Set()); // To track selected collection
   const [error, setError] = useState(null); 
-  
+  const [favorites, setFavorites] = useState([]);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
 
   // Fetch user data when the component mounts
   useEffect(() => {
-    axios.get(`https://marvel-nexus-backend.click/profile`, { withCredentials: true })
-      .then(response => setUser(response.data))
-      .catch(error => console.error('Error fetching user:', error));
+    axios.get(`${import.meta.env.VITE_API_URL}/profile`, { withCredentials: true })
+      .then(res => setUser(res.data))
+      .catch(err => {
+        console.error("Failed to load user:", err);
+        setError("Failed to load user data");
+      });
+    const savedHistory = JSON.parse(localStorage.getItem("searchHistory"));
+    if (savedHistory) setSearchHistory(savedHistory);
   }, []);
 
   // Handle the search form submission
@@ -29,7 +37,7 @@ function ExplorePage() {
   };
 
   const getSearchConfig = (type, offsetValue) => {
-    let url = `https://marvel-nexus-backend.click/api/search`;
+    let url = `${import.meta.env.VITE_API_URL}/api/search`;
     let params = { offset: offsetValue };
 
     if (type === "title") {
@@ -37,11 +45,11 @@ function ExplorePage() {
       params.title = searchQuery;
     } else if (type === "character") {
       // Call a dedicated endpoint for character search; backend should handle
-      url = `https://marvel-nexus-backend.click/api/search/character`;
+      url = `${import.meta.env.VITE_API_URL}/api/search/character`;
       params.name = searchQuery;
     } else if (type === "series") {
       // Call a dedicated endpoint for series search; backend should handle
-      url = `https://marvel-nexus-backend.click/api/search/series`;
+      url = `${import.meta.env.VITE_API_URL}/api/search/series`;
       params.series = searchQuery;
     }
     return { url, params };
@@ -49,6 +57,14 @@ function ExplorePage() {
 
   // General search handler that accepts the type of search as an argument
   const handleSearch = async (type) => {
+    if (!searchQuery.trim()) {
+      setError("Please enter a search query.");
+      return;
+    }
+    if (!searchHistory.includes(searchQuery)) {
+      setSearchHistory(prev => [searchQuery, ...prev.slice(0, 9)]); // max 10 items
+      localStorage.setItem("searchHistory", JSON.stringify([searchQuery, ...searchHistory.slice(0, 9)]));
+    }    
     setLoading(true);
     setOffset(0);
     try {
@@ -56,6 +72,7 @@ function ExplorePage() {
       const response = await axios.get(url, { params });
       setComics(response.data.results);
       setTotalComics(response.data.total);
+      setError(null);
     } catch (error) {
       console.error("Error fetching comics:", error.response || error.message);
       setError("Failed to fetch comics");
@@ -63,17 +80,21 @@ function ExplorePage() {
       setLoading(false);
     }
   };
+  
+  
 
   const loadMoreComics = async () => {
+    if (!searchQuery.trim()) return; // prevent empty search
     setLoading(true);
     try {
-      const newOffset = offset + 20; 
-      const response = await axios.get(`https://marvel-nexus-backend.click/api/search`, {
+      const newOffset = offset + 20;
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/search`, {
         params: { title: searchQuery, offset: newOffset },
       });
       setComics(response.data.results);
-      setOffset(newOffset); 
-      window.scrollTo({top:0, behavior: "smooth"});
+      setOffset(newOffset);
+      setError(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       console.error("Error fetching more comics:", error.response || error.message);
       setError("Failed to fetch more comics");
@@ -82,17 +103,21 @@ function ExplorePage() {
     }
   };
   
+  
   const loadPreviousComics = async () => {
+    if (!searchQuery.trim()) return;
+
     if (offset > 0) {
       setLoading(true);
       try {
         const newOffset = offset - 20;
-        const response = await axios.get(`https://marvel-nexus-backend.click/api/search`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/search`, {
           params: { title: searchQuery, offset: newOffset },
         });
         setComics(response.data.results);
-        setOffset(newOffset); 
-        window.scrollTo({top:0, behavior: "smooth"});
+        setOffset(newOffset);
+        setError(null); // ✅ clear error on success
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error) {
         console.error("Error fetching previous comics:", error.response || error.message);
         setError("Failed to fetch previous comics");
@@ -102,26 +127,35 @@ function ExplorePage() {
     }
   };
   
+  
   // Function to trigger adding to collection
   const handleAddToCollection = (comic) => {
     setSelectedComic(comic);
   };
 
   // Function to handle collection selection
-  const handleCollectionChange = (collectionId) => {
-    setSelectedCollection(collectionId);
-  };
+  const handleCollectionChange = (collectionId, isChecked) => {
+    setSelectedCollections(prev => {
+      const updated = new Set(prev);
+      if (isChecked) {
+        updated.add(collectionId);
+      } else {
+        updated.delete(collectionId);
+      }
+      return updated;
+    });
+  };  
 
   // Function to confirm adding to collection
   const handleConfirmSelection = async () => {
-    if (selectedCollection && selectedComic && user) {
+    if (selectedCollections.size > 0 && selectedComic && user) {
       const comicData = { 
         title: selectedComic.title, 
         thumbnail: {
           path: selectedComic.thumbnail.path,
           extension: selectedComic.thumbnail.extension,
         },  
-        issueNumber: selectedComic.issueNumber || 'N/A',
+        issueNumber: selectedComic.issueNumber || '1',
         creators: Array.isArray(selectedComic.creators?.items)
           ? selectedComic.creators.items.map(creator => ({
               role: creator.role || "Unknown",
@@ -131,33 +165,59 @@ function ExplorePage() {
         description: selectedComic.description || 'No description available',
         series: selectedComic.series.name,
       };
-
+  
       try {
-        await axios.post(`https://marvel-nexus-backend.click/api/users/${user._id}/collections/${selectedCollection}/comics`, comicData);
-        alert("Comic added to collection!");
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/users/${user._id}/comics/add-to-collections`, {
+          collectionIds: Array.from(selectedCollections),
+          comic: comicData
+        });
+  
+        alert("Comic added to selected collections!");
         setSelectedComic(null);
-        setSelectedCollection(null);
+        setSelectedCollections(new Set());
       } catch (error) {
         console.error("Error adding comic to collection:", error);
         setError("Failed to add comic to collection");
       }
     } else {
-      alert("Please select a collection.");
+      alert("Please select at least one collection.");
     }
   };
-
-
+  
   return (
     <div className="explore-page">
       <h1>Explore Comics</h1>
       <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Search for comics or characters, characters, or series..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-         <div className="search-buttons">
+        <div className="search-wrapper">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 100)} // allows click
+          />
+
+          {showSuggestions && searchQuery && (
+            <ul className="suggestion-list">
+              {searchHistory
+                .filter(q => q.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((suggestion, i) => (
+                  <li key={i} onClick={() => {
+                    setSearchQuery(suggestion);
+                    setShowSuggestions(false);
+                  }}>
+                    {suggestion}
+                  </li>
+                ))
+              }
+            </ul>
+          )}
+        </div>
+        <div className="search-buttons">
           <button type="button" onClick={() => handleSearch("title")} disabled={loading}>
             Search by Title
           </button>
@@ -171,17 +231,26 @@ function ExplorePage() {
       </div>
 
       {error && <p role="alert">{error}</p>}
+      {!loading && comics.length > 0 && (
+        <p className="comic-count">
+          Showing {offset + 1}–{offset + comics.length} of {total} comics
+        </p>
+      )}
+
 
       <div className="comic-container">
         {loading ? (
           <p>Loading...</p>
+        ) : !user ? (
+          <p>Loading user...</p>
         ) : (
           comics.map((comic) => (
             <ComicCard
               key={comic.id}
               comic={comic}
               onSelect={setSelectedComic}
-              onAddToCollection={handleAddToCollection}
+              isFavorite={favorites.includes(comic._id ?? comic.id)}
+              onToggleFavorite={(c) => toggleFavorite(user._id, c, setFavorites)}
             />
           ))
         )}
@@ -195,6 +264,7 @@ function ExplorePage() {
         onCollectionChange={handleCollectionChange}
         onConfirmSelection={handleConfirmSelection}
       />
+      <p><br></br></p>
       {comics.length > 0 && (
         <div className="pagination">
           {offset > 0 && (
@@ -206,7 +276,7 @@ function ExplorePage() {
               Previous
             </button>
           )}
-          {comics.length < totalComics && (
+          {offset + 20 < total && (
             <button
               className="exploreBtn"
               onClick={loadMoreComics}

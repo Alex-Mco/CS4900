@@ -19,7 +19,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const redirectPath = params.get("redirect");
 
-    fetch(`https://marvel-nexus-backend.click/auth/session`, { credentials: "include" })
+    fetch(`${import.meta.env.VITE_API_URL}/auth/session`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         if (data.isAuthenticated) {

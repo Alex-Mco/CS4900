@@ -78,7 +78,7 @@ describe("CollectionGallery Component", () => {
     fireEvent.click(screen.getByText("Add Collection"));
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith("http://localhost:5000/api/users/user123/collections", {
+      expect(axios.post).toHaveBeenCalledWith("http://localhost:8080/api/users/user123/collections", {
         collectionName: "Star Wars",
       });
 
