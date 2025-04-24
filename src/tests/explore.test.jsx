@@ -18,12 +18,12 @@ describe("ExplorePage Component", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     axios.get.mockImplementation((url) => {
-        if (url.includes("/profile")) {
-          return Promise.resolve({ data: { _id: "123", collections: [] } });
-        }
-        return Promise.resolve({ data: { results: [], total: 0 } });
-      });
-  });
+      if (url.includes("/profile")) {
+        return Promise.resolve({ data: { _id: "123", collections: [] } });
+      }
+      return Promise.reject(new Error("Unexpected API call"));
+    });
+  });  
   afterAll(()=>{
     vi.clearAllMocks();
   })
@@ -32,7 +32,7 @@ describe("ExplorePage Component", () => {
     render(<ExplorePage />);
     await waitFor(() => expect(screen.getByText(/Explore/i)).toBeInTheDocument());
     expect(screen.getByText(/Explore/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Search for comics or characters/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Search by Title/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Search by Character/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Search by Series/i })).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe("ExplorePage Component", () => {
   test("updates search input value", () => {
     render(<ExplorePage />);
     
-    const searchInput = screen.getByPlaceholderText(/Search for comics or characters/i);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
     fireEvent.change(searchInput, { target: { value: "Spider-Man" } });
     
     expect(searchInput.value).toBe("Spider-Man");
@@ -58,10 +58,12 @@ describe("ExplorePage Component", () => {
             results: [
               {
                 id: 1,
-                title: "Spider-Man",
-                thumbnail: { path: "http://example.com/image", extension: "jpg" },
+                name: "Spider-Man", // use 'name' not 'title' if your component expects it
+                issue_number: "1",
+                volume: { name: "Amazing Spider-Man" },
+                image: { original_url: "http://example.com/image.jpg" },
                 creators: { items: [{ role: "Writer", name: "Stan Lee" }] },
-                series: { name: "Amazing Spider-Man" },
+                description: "A great issue."
               },
             ],
             total: 1,
@@ -75,7 +77,7 @@ describe("ExplorePage Component", () => {
     render(<ExplorePage />);
   
     fireEvent.change(
-      screen.getByPlaceholderText(/Search for comics or characters/i),
+      screen.getByPlaceholderText(/Search/i),
       { target: { value: "Spider-Man" } }
     );
     fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
@@ -115,7 +117,7 @@ describe("ExplorePage Component", () => {
       
     render(<ExplorePage />);
   
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Hulk" } });
+    fireEvent.change(screen.getByPlaceholderText(/Search/i), { target: { value: "Hulk" } });
     fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
   
     await waitFor(() => {
@@ -124,49 +126,65 @@ describe("ExplorePage Component", () => {
   });
   
 
+
+
+
   test("pagination - loads next page", async () => {
-    axios.get.mockImplementation((url) => {
-      if (url.includes("/profile")) {
-        return Promise.resolve({ data: { _id: "123", collections: [] } });
-      }
-      if (url.includes("/api/search")) {
-        return Promise.resolve({
-          data: { 
-            results: [
-              { id: 2, 
-                title: "Iron Man", 
-                thumbnail: { path: "image", extension: "jpg" }, 
-                creators: { items: [] } 
-              }
-            ], 
-            total: 30 
-          },
-        });
-      }
-      return Promise.reject(new Error("Unexpected API call"));
-    });
-
-    render(<ExplorePage />);
-
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Iron Man" } });
-    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Iron Man/i)).toBeInTheDocument();
-    });
-
+    // 1st API call for /profile
+    axios.get.mockResolvedValueOnce({ data: { _id: "123", collections: [] } });
+  
+    // 2nd API call: First page (20 comics)
     axios.get.mockResolvedValueOnce({
-      data: { results: [{ id: 3, title: "Thor", thumbnail: { path: "image", extension: "jpg" }, creators: { items: [] } }], total: 30 },
+      data: { 
+        results: Array.from({ length: 20 }, (_, i) => ({
+          id: i + 1,
+          name: `Iron Man #${i + 1}`,
+          volume: { name: "Iron Man" },
+          issue_number: `${i + 1}`,
+          image: { original_url: "http://example.com/image.jpg" },
+          person_credits: [],
+        }))
+      },
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /Next/i }));
-
+  
+    render(<ExplorePage />);
+  
+    fireEvent.change(screen.getByPlaceholderText(/Search/i), { target: { value: "Iron Man" } });
+    fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
+  
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("http://localhost:8080/api/search", {
-        params: { title: "Iron Man", offset: 20 },
-      });
+      expect(screen.getAllByText(/Iron Man #1/i).length).toBeGreaterThan(0);
+      expect(screen.getByRole("button", { name: /Next/i })).toBeInTheDocument();
+    });
+  
+    // 3rd API call: Second page (Thor)
+    axios.get.mockResolvedValueOnce({
+      data: {
+        results: [
+          { 
+            id: 21,
+            name: "Thor #1",
+            volume: { name: "Mighty Thor" },
+            issue_number: "1",
+            image: { original_url: "http://example.com/thor.jpg" },
+            person_credits: [],
+          }
+        ]
+      }
+    });
+  
+    fireEvent.click(screen.getByRole("button", { name: /Next/i }));
+  
+    await waitFor(() => {
+      expect(screen.getByText(/Thor #1/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Next/i })).toBeInTheDocument();
     });
   });
+  
+  
+
+
+
 
   test("adds a comic to collection and confirms selection", async () => {
     axios.get.mockImplementation((url) => {
@@ -176,11 +194,14 @@ describe("ExplorePage Component", () => {
       if (url.includes("/api/search")) {
         return Promise.resolve({
           data: { results: [
-            { id: 1, 
-              title: "Spider-Man", 
-              thumbnail: { path: "image", extension: "jpg" }, 
-              creators: { items: [] }, 
-              series: { name: "Marvel Comics" } 
+            {
+              id: 1,
+              name: "Spider-Man", // use 'name' not 'title' if your component expects it
+              issue_number: "1",
+              volume: { name: "Amazing Spider-Man" },
+              image: { original_url: "http://example.com/image.jpg" },
+              creators: { items: [{ role: "Writer", name: "Stan Lee" }] },
+              description: "A great issue."
             }], 
             total: 1 
           },
@@ -195,7 +216,7 @@ describe("ExplorePage Component", () => {
 
     render(<ExplorePage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Spider-Man" } });
+    fireEvent.change(screen.getByPlaceholderText(/Search/i), { target: { value: "Spider-Man" } });
     fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
 
     // Ensure a comic is displayed
@@ -204,10 +225,10 @@ describe("ExplorePage Component", () => {
     });
 
     // Click on the comic to trigger selection
-    fireEvent.click(screen.getByText(/Spider-Man/i)); 
+    fireEvent.click(screen.getByRole("heading", { name: /Spider-Man/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Select a Collection/i)).toBeInTheDocument();
+      expect(screen.getByText(/Add to Collection/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Favorites/i)).toBeInTheDocument();
     });
 
@@ -215,7 +236,7 @@ describe("ExplorePage Component", () => {
     fireEvent.click(screen.getByRole("button", { name: /Confirm/i }));
 
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith("http://localhost:8080/api/users/123/collections/abc/comics", expect.any(Object));
+      expect(axios.post).toHaveBeenCalledWith("http://localhost:8080/api/users/123/comics/add-to-collections", expect.any(Object));
     });
   });
 
@@ -227,11 +248,14 @@ describe("ExplorePage Component", () => {
       if (url.includes("/api/search")) {
         return Promise.resolve({
           data: { results: [
-            { id: 1, 
-              title: "Spider-Man", 
-              thumbnail: { path: "image", extension: "jpg" }, 
-              creators: { items: [] }, 
-              series: { name: "Marvel Comics" } 
+            {
+              id: 1,
+              name: "Spider-Man", // use 'name' not 'title' if your component expects it
+              issue_number: "1",
+              volume: { name: "Amazing Spider-Man" },
+              image: { original_url: "http://example.com/image.jpg" },
+              creators: { items: [{ role: "Writer", name: "Stan Lee" }] },
+              description: "A great issue."
             }], 
             total: 1 
           },
@@ -248,7 +272,7 @@ describe("ExplorePage Component", () => {
 
     render(<ExplorePage />);
 
-    fireEvent.change(screen.getByPlaceholderText(/Search for comics/i), { target: { value: "Spider-Man" } });
+    fireEvent.change(screen.getByPlaceholderText(/Search/i), { target: { value: "Spider-Man" } });
     fireEvent.click(screen.getByRole("button", { name: /Search by Title/i }));
 
     await waitFor(() => {
@@ -256,10 +280,10 @@ describe("ExplorePage Component", () => {
     });
     
     // Click on the comic to trigger selection
-    fireEvent.click(screen.getByText(/Spider-Man/i)); 
+    fireEvent.click(screen.getByRole("heading", { name: /Spider-Man/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Select a Collection/i)).toBeInTheDocument();
+      expect(screen.getByText(/Add to Collection/i)).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByLabelText(/Favorites/i));

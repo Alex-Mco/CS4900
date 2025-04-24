@@ -72,23 +72,39 @@ describe('Unauthenticated Server API tests', () => {
         expect(res.status).toBe(404);
     });
 
-    test('should fetch Marvel comics', async () => {
+    test('should fetch Comic Vine comics', async () => {
         axios.get = jest.fn().mockResolvedValueOnce({
-        data: {
-            data: {
-            results: [{ title: 'Spider-Man' }],
-            total: 1,
-            },
-        },
+          data: {
+            status_code: 1,
+            results: [
+              {
+                id: 12345,
+                name: 'Comic Test Title',
+                issue_number: '1',
+                person_credits: [
+                  { role: 'Writer', name: 'John Doe' },
+                  { role: 'Artist', name: 'Jane Doe' },
+                ],
+                description: '<p>Test description</p>',
+                image: {
+                  original_url: 'https://example.com/image.jpg'
+                },
+                volume: { name: 'Test Series' },
+                publisher: { name: 'Marvel' }
+              }
+            ],
+            number_of_total_results: 1
+          }
         });
-
-        const res = await agent.get('/api/search?title=Spider-Man');
+      
+        const res = await agent.get('/api/search?name=Test');
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('results');
         expect(Array.isArray(res.body.results)).toBe(true);
-        expect(res.body.results[0]).toHaveProperty('title', 'Spider-Man');
+        expect(res.body.results[0]).toHaveProperty('name', 'Comic Test Title');
     });
-
+      
+      
     test('should return an error for missing search query', async () => {
         const res = await agent.get('/api/search');
         expect(res.status).toBe(400);

@@ -212,154 +212,42 @@ connectDatabase()
     //Comic Title Search Endpoint
     app.get("/api/search", async (req, res) => {
       const searchQuery = req.query.title;
-      const offset = req.query.offset || 0;
+      const pageNumber = Math.floor((req.query.offset || 0) / 20) + 1; // Comic Vine uses page numbers
       const limit = 20;
-
+    
       if (!searchQuery) {
         return res.status(400).json({ error: "Title query is required" });
       }
-
-      const timestamp = new Date().getTime();
-      const hash = generateHash(timestamp);
-
+    
       try {
-        const response = await axios.get("https://gateway.marvel.com/v1/public/comics", {
+        const response = await axios.get("https://comicvine.gamespot.com/api/search/", {
           params: {
-            apikey: process.env.MARVEL_PUBLIC_KEY,
-            ts: timestamp,
-            hash: hash,
-            titleStartsWith: searchQuery,
-            offset: offset,
+            api_key: process.env.COMIC_API_KEY,
+            format: "json",
+            query: searchQuery,
+            resources: "issue",
             limit: limit,
+            page: pageNumber,
           },
+          headers: {
+            'User-Agent': 'MarvelNexusApp/1.0'
+          }
         });
-
-        // Return the results from the Marvel API
+    
+        if (response.data.status_code !== 1) {
+          throw new Error("Comic Vine API Error");
+        }
+    
         res.json({
-          results: response.data.data.results,
-          total: response.data.data.total,
+          results: response.data.results,
+          total: response.data.number_of_total_results,
         });
       } catch (error) {
-        console.error("Error fetching comics from Marvel API:", error);
+        console.error("Error fetching comics from Comic Vine API:", error);
         res.status(500).json({ error: "Failed to fetch comics" });
       }
-    });
-
-    //Character Search Endpoint
-    app.get("/api/search/character", async (req, res) => {
-      const searchQuery = req.query.name;
-      const offset = req.query.offset || 0;
-      const limit = 20;
-
-      if (!searchQuery) {
-        return res.status(400).json({ error: "Name query is required" });
-      }
-
-      const timestamp = new Date().getTime();
-      const hash = generateHash(timestamp);
-
-      try {
-        // First, search for characters matching the query
-        const characterResponse = await axios.get("https://gateway.marvel.com/v1/public/characters", {
-          params: {
-            apikey: process.env.MARVEL_PUBLIC_KEY,
-            ts: timestamp,
-            hash: hash,
-            nameStartsWith: searchQuery,
-            offset: offset,
-            limit: limit,
-          },
-        });
-
-        if (characterResponse.data.data.results.length === 0) {
-          return res.json({ results: [], total: 0 });
-        }
-
-        // Take the first matching character's ID
-        const characterId = characterResponse.data.data.results[0].id;
-
-        // Now fetch comics for that character
-        const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/characters/${characterId}/comics`, {
-          params: {
-            apikey: process.env.MARVEL_PUBLIC_KEY,
-            ts: timestamp,
-            hash: hash,
-            offset: offset,
-            limit: limit,
-          },
-        });
-
-        res.json({
-          results: comicsResponse.data.data.results,
-          total: comicsResponse.data.data.total,
-        });
-      } catch (error) {
-        console.error("Error fetching comics by character from Marvel API:", error);
-        res.status(500).json({ error: "Failed to fetch comics by character" });
-      }
-    });
-
-    //Series Search Endpoint
-    app.get("/api/search/series", async (req, res) => {
-      const searchQuery = req.query.series;
-      const offset = req.query.offset || 0;
-      const limit = 20;
+    });    
     
-      if (!searchQuery) {
-        return res.status(400).json({ error: "Series query is required" });
-      }
-    
-      const timestamp = new Date().getTime();
-      const hash = generateHash(timestamp);
-    
-      try {
-        // First, search for series matching the query
-        const seriesResponse = await axios.get("https://gateway.marvel.com/v1/public/series", {
-          params: {
-            apikey: process.env.MARVEL_PUBLIC_KEY,
-            ts: timestamp,
-            hash: hash,
-            titleStartsWith: searchQuery,
-            offset: offset,
-            limit: limit,
-          },
-        });
-    
-        if (seriesResponse.data.data.results.length === 0) {
-          return res.json({ results: [], total: 0 });
-        }
-    
-        const matchingSeries = seriesResponse.data.data.results;
-
-        const allComics = [];
-        let totalAvailable = 0;
-        for (const series of matchingSeries) {
-          const seriesId = series.id;
-
-          const comicsResponse = await axios.get(`https://gateway.marvel.com/v1/public/series/${seriesId}/comics`, {
-            params: {
-              apikey: process.env.MARVEL_PUBLIC_KEY,
-              ts: timestamp,
-              hash: hash,
-              offset: 0, // optional: customize per series
-              limit: 10  // optional: limit per series to avoid hitting API limit
-            },
-          });
-          totalAvailable += comicsResponse.data.data.total;
-          allComics.push(...comicsResponse.data.data.results);
-        }
-
-        res.json({
-          results: allComics,
-          total: totalAvailable,
-        });
-
-      } catch (error) {
-        console.error("Error fetching comics by series from Marvel API:", error);
-        res.status(500).json({ error: "Failed to fetch comics by series" });
-      }
-    });
-
     // Start server only after connecting to the DB
     const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => console.log(`Running on ${PORT}`));

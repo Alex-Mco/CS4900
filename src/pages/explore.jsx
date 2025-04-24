@@ -27,51 +27,76 @@ function ExplorePage() {
         console.error("Failed to load user:", err);
         setError("Failed to load user data");
       });
+
     const savedHistory = JSON.parse(localStorage.getItem("searchHistory"));
     if (savedHistory) setSearchHistory(savedHistory);
   }, []);
-
-  // Handle the search form submission
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
 
   const getSearchConfig = (type, offsetValue) => {
     let url = `${import.meta.env.VITE_API_URL}/api/search`;
     let params = { offset: offsetValue };
 
     if (type === "title") {
-      // Using partial match search for comic titles
       params.title = searchQuery;
     } else if (type === "character") {
-      // Call a dedicated endpoint for character search; backend should handle
       url = `${import.meta.env.VITE_API_URL}/api/search/character`;
       params.name = searchQuery;
-    } else if (type === "series") {
-      // Call a dedicated endpoint for series search; backend should handle
-      url = `${import.meta.env.VITE_API_URL}/api/search/series`;
-      params.series = searchQuery;
     }
+
     return { url, params };
   };
 
-  // General search handler that accepts the type of search as an argument
+  const transformComicVineData = (results) => {
+    if (!Array.isArray(results)) return [];
+
+    return results.map(item => {
+      const rawTitle = item.name || "";
+      const seriesName = item.volume?.name || "Unknown Series";
+      const issueNumber = item.issue_number || "N/A";
+      const composedTitle = rawTitle.trim() ? rawTitle : `${seriesName} #${issueNumber}`;
+      const plainDescription = item.description ? item.description.replace(/<[^>]+>/g, '') : "No description available";
+
+      return {
+        id: item.id,
+        title: composedTitle,
+        issueNumber,
+        creators: {
+          items: (item.person_credits || []).map(person => ({
+            role: person.role || "Unknown",
+            name: person.name || "Unknown"
+          }))
+        },
+        description: plainDescription,
+        thumbnail: {
+          path: item.image?.original_url.split('/').slice(0, -1).join('/'),
+          extension: item.image?.original_url.split('.').pop(),
+          url: item.image?.original_url
+        },
+        series: { name: seriesName }
+      };
+    });
+  };
+
   const handleSearch = async (type) => {
     if (!searchQuery.trim()) {
       setError("Please enter a search query.");
       return;
     }
+
     if (!searchHistory.includes(searchQuery)) {
-      setSearchHistory(prev => [searchQuery, ...prev.slice(0, 9)]); // max 10 items
-      localStorage.setItem("searchHistory", JSON.stringify([searchQuery, ...searchHistory.slice(0, 9)]));
-    }    
+      const updatedHistory = [searchQuery, ...searchHistory.slice(0, 9)];
+      setSearchHistory(updatedHistory);
+      localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+    }
+
     setLoading(true);
     setOffset(0);
+
     try {
       const { url, params } = getSearchConfig(type, 0);
       const response = await axios.get(url, { params });
-      setComics(response.data.results);
-      setTotalComics(response.data.total);
+      const formattedComics = transformComicVineData(response.data.results || []);
+      setComics(formattedComics);
       setError(null);
     } catch (error) {
       console.error("Error fetching comics:", error.response || error.message);
@@ -80,18 +105,19 @@ function ExplorePage() {
       setLoading(false);
     }
   };
-  
-  
 
   const loadMoreComics = async () => {
-    if (!searchQuery.trim()) return; // prevent empty search
+    if (!searchQuery.trim()) return;
+
     setLoading(true);
+    const newOffset = offset + 20;
+
     try {
-      const newOffset = offset + 20;
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/search`, {
         params: { title: searchQuery, offset: newOffset },
       });
-      setComics(response.data.results);
+      const formattedComics = transformComicVineData(response.data.results || []);
+      setComics(formattedComics);
       setOffset(newOffset);
       setError(null);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -102,36 +128,30 @@ function ExplorePage() {
       setLoading(false);
     }
   };
-  
-  
-  const loadPreviousComics = async () => {
-    if (!searchQuery.trim()) return;
 
-    if (offset > 0) {
-      setLoading(true);
-      try {
-        const newOffset = offset - 20;
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/search`, {
-          params: { title: searchQuery, offset: newOffset },
-        });
-        setComics(response.data.results);
-        setOffset(newOffset);
-        setError(null); // ✅ clear error on success
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } catch (error) {
-        console.error("Error fetching previous comics:", error.response || error.message);
-        setError("Failed to fetch previous comics");
-      } finally {
-        setLoading(false);
-      }
+  const loadPreviousComics = async () => {
+    if (!searchQuery.trim() || offset <= 0) return;
+
+    setLoading(true);
+    const newOffset = offset - 20;
+
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/search`, {
+        params: { title: searchQuery, offset: newOffset },
+      });
+      const formattedComics = transformComicVineData(response.data.results || []);
+      setComics(formattedComics);
+      setOffset(newOffset);
+      setError(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      console.error("Error fetching previous comics:", error.response || error.message);
+      setError("Failed to fetch previous comics");
+    } finally {
+      setLoading(false);
     }
   };
   
-  
-  // Function to trigger adding to collection
-  const handleAddToCollection = (comic) => {
-    setSelectedComic(comic);
-  };
 
   // Function to handle collection selection
   const handleCollectionChange = (collectionId, isChecked) => {
@@ -221,19 +241,13 @@ function ExplorePage() {
           <button type="button" onClick={() => handleSearch("title")} disabled={loading}>
             Search by Title
           </button>
-          <button type="button" onClick={() => handleSearch("character")} disabled={loading}>
-            Search by Character
-          </button>
-          <button type="button" onClick={() => handleSearch("series")} disabled={loading}>
-            Search by Series
-          </button>
         </div>
       </div>
 
       {error && <p role="alert">{error}</p>}
       {!loading && comics.length > 0 && (
         <p className="comic-count">
-          Showing {offset + 1}–{offset + comics.length} of {total} comics
+          Showing {offset + 1}–{offset + comics.length}
         </p>
       )}
 
@@ -256,7 +270,6 @@ function ExplorePage() {
         )}
       </div>
 
-      {/* Comic Detail and Collection Selection Modal */}
       <ComicDetail 
         comic={selectedComic} 
         onClose={() => setSelectedComic(null)} 
@@ -276,15 +289,9 @@ function ExplorePage() {
               Previous
             </button>
           )}
-          {offset + 20 < total && (
-            <button
-              className="exploreBtn"
-              onClick={loadMoreComics}
-              disabled={loading}
-            >
+            <button className="exploreBtn" onClick={loadMoreComics} disabled={loading}>
               Next
             </button>
-          )}
         </div>
       )}
     </div>

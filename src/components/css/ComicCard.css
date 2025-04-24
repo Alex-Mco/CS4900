@@ -1,3 +1,9 @@
+.comic-cards img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+  
 .comic-cards {
     background-color: #202020;
     border: 2px solid #c6a972;
