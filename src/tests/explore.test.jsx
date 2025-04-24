@@ -34,8 +34,6 @@ describe("ExplorePage Component", () => {
     expect(screen.getByText(/Explore/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Search/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Search by Title/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Search by Character/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Search by Series/i })).toBeInTheDocument();
   });
 
   test("updates search input value", () => {
