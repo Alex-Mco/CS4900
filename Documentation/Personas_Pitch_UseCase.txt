@@ -10,17 +10,14 @@ Occupation: Full-time college student
 About:
 Luke is a Marvel fan who enjoys both the comics and movies. He loves diving into the backstories of characters and often uses this knowledge to impress friends. As a student, his schedule is packed with classes, assignments, and extracurricular activities, leaving little time for hobbies. He uses his downtime to explore Marvel lore and unwind.
 Goals:
-* Discover lesser-known Marvel characters and their story arcs.
 * Keep track of comics he wants to read during breaks.
-* Share interesting Marvel facts with friends.
 Needs:
-* A user-friendly app to quickly search for characters and comics.
-* A way to save favorite characters and comics to revisit later.
-* Personalized recommendations to explore new comics during free time.
+* A user-friendly app to quickly search for comics.
+* A way to save favorite comics to revisit later.
 Frustrations:
 * Feels overwhelmed by the vast amount of Marvel content available.
 * Finds it hard to remember which comics he has already read or wants to read.
-* Wishes there was a single platform to explore Marvel characters and comics without needing multiple apps or websites.
+* Wishes there was a single platform to explore Marvel comics without needing multiple apps or websites.
 
 Persona 2: Sam
 Name: Sam
@@ -35,7 +32,6 @@ Goals:
 * Complete missing issues in his favorite story arcs or series.
 Needs:
 * A robust app to track his physical and digital comic inventory.
-* Recommendations for comics related to his existing collection.
 * A search feature to quickly find details about specific comics or series.
 Frustrations:
 * Finds it challenging to keep track of comics he owns versus ones he still needs.
@@ -64,14 +60,10 @@ Use Case 9: View Collections
         User Story: As a user, I want to browse my existing collections and view their contents.
 Use Case 10: Remove from Collections
         User Story: As a user, I want to remove a comic or character from my favorites or a specific collection.
-Use Case 11: RemoveCollections
+Use Case 11: Remove Collections
         User Story: As a user, I want to remove a collection from my user.
 Use Case 12: Update User Account
         User Story: As a user, I want to update my account settings, such as email or password.
 Use Case 13: Log Out
         User Story: As a user, I want to log out of my account to end my session securely.
-Use Case 14: Explore Dashboard
-        User Story: As a user, I want to access and explre the dashboard to view a overview of my activity and saved items
-Use Case 15: View recommended Comics
-        User Story: As a user, I want to receive personalized recommendations for comics based on my activity.
 
