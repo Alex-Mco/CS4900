@@ -1,5 +1,5 @@
 Project Elevator pitch:
-        Marvel Nexus is a web application for Marvel comic enthusiasts to explore characters and manage their comic collections. It offers detailed character profiles, a comic library with personalized recommendations, and a user-friendly interface for browsing and tracking favorites. All you need in one application for any comic fan.
+        Marvel Nexus is a web application for Marvel comic enthusiasts to explore comics and manage their comic collections. It offers detailed comic profiles, a personalized comic library and a user-friendly interface for browsing and tracking favorites. All you need in one application for any comic fan.
 
 Personas: 
 Persona 1: Luke
