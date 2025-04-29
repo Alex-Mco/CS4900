@@ -68,8 +68,6 @@ function ExplorePage() {
         },
         description: plainDescription,
         thumbnail: {
-          path: item.image?.original_url.split('/').slice(0, -1).join('/'),
-          extension: item.image?.original_url.split('.').pop(),
           url: item.image?.original_url
         },
         series: { name: seriesName }
@@ -172,8 +170,7 @@ function ExplorePage() {
       const comicData = { 
         title: selectedComic.title, 
         thumbnail: {
-          path: selectedComic.thumbnail.path,
-          extension: selectedComic.thumbnail.extension,
+          url: selectedComic.thumbnail?.url || "/images/default_book_cover.webp"
         },  
         issueNumber: selectedComic.issueNumber || '1',
         creators: Array.isArray(selectedComic.creators?.items)

@@ -31,7 +31,6 @@ function CollectionPage() {
           setCollection((prevCollection) => {
             if (!prevCollection) return null;
             const updatedComics = prevCollection.comics.filter((comic) => comic._id !== comicId);
-            console.log("Updated comics after removal:", updatedComics);
             return { ...prevCollection, comics: [...updatedComics] };
           });
   

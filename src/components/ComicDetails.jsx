@@ -2,12 +2,13 @@ import React from "react";
 import "./css/ComicDetails.css";
 
 const getValidThumbnailUrl = (thumbnail) => {
-  if (!thumbnail || !thumbnail.url) {
-    return "/images/default_book_cover.webp";
+  if (!thumbnail) return "/images/default_book_cover.webp";
+  if (thumbnail.url) return thumbnail.url;
+  if (thumbnail.path && thumbnail.extension) {
+    return `${thumbnail.path}.${thumbnail.extension}`;
   }
-  return thumbnail.url;
+  return "/images/default_book_cover.webp";
 };
-
 
 const ComicDetails = ({ 
   comic, 
@@ -26,10 +27,12 @@ const ComicDetails = ({
       <button className="close-button" onClick={onClose}>✖</button>
 
       <div className="comic-header">
-      <img className="comic-thumbnail"
-        src={comic.thumbnail.url || `${comic.thumbnail.path}.${comic.thumbnail.extension}`} 
-        alt={comic.title} 
+      <img
+        className="comic-thumbnail"
+        src={getValidThumbnailUrl(comic.thumbnail)}
+        alt={comic.title || "Comic Cover"}
       />
+
       </div>
 
       <div className="comic-details">
