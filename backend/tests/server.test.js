@@ -97,7 +97,7 @@ describe('Unauthenticated Server API tests', () => {
           }
         });
       
-        const res = await agent.get('/api/search?name=Test');
+        const res = await agent.get('/api/search?title=Test');
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('results');
         expect(Array.isArray(res.body.results)).toBe(true);

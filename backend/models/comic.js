@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const comicSchema = new mongoose.Schema({
-  title: { type: String, required: true }, // Comic Vine uses "name" but we can map it to "title"
+  title: { type: String, required: true }, 
   issueNumber: { type: Number },
   creators: {
     items: [{
@@ -10,7 +10,7 @@ const comicSchema = new mongoose.Schema({
     }]
   },
   description: { type: String },
-  thumbnail: { // Change to simpler URL based
+  thumbnail: {
     url: { type: String }
   },
   series: {
