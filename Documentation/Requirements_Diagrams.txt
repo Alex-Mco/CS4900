@@ -1,6 +1,5 @@
 ﻿Functional Requirements: 
 1. Search comics by title, series, or character.
-2. Provide personalized comic recommendations.
 3. Show a list of Users Comics collections 
 4. Allow a user to add and delete comics to or from a collection
 5. User authentication using OAuth.
@@ -59,47 +58,33 @@ const userSchema = new mongoose.Schema({
   collections: [collectionSchema],
 });
 
-Comic Model:
+const mongoose = require('mongoose');
+
+//changed based on the API being used and the way it returns comics
 const comicSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  issueNumber: {
-    type: Number,
-  },
+  title: { type: String, required: true },
+  issueNumber: { type: Number },
   creators: {
     items: [{
-      role: {
-        type: String,
-      },
-      name: {
-        type: String,
-      }
+      role: { type: String },
+      name: { type: String }
     }]
   },
-  description: {
-    type: String,
-  },
+  description: { type: String },
   thumbnail: {
-    path: {
-      type: String,
-    },
-    extension: {
-      type: String,
-    }
+    url: { type: String }
   },
   series: {
-    name: { type: String, required: false },
-    resourceURI: { type: String, default: "" }
+    name: { type: String },
+    id: { type: Number }
   },
-  variant: {
-    type: Boolean,
-  },
-  pgCount: {
-    type: Number, 
-  }
+  pgCount: { type: Number }
 });
+
+const Comic = mongoose.model('Comic', comicSchema);
+
+module.exports = Comic;
+
 
 Json web service input and output for each RESTful endpoint: 
 1. GET /characters?name=Iron+Man
@@ -131,9 +116,11 @@ json
 
 Architectural Stack:
 Frontend: React Vite
-Backend: Node.js, Express.js
-Database: MongoDB for user, comic, and character data
-API Integration: Marvel API (free to use with an account)
+Backend: Node.js, Express.js, plain javascript
+Database: MongoDB for session, user, comic, and collection data
+API Integration: Marvel API (free to use with an account), Comic Vine API which is also free with an account
 Authentication: OAuth 2.0 with google for user authentication.
-Hosting: AWS frontend and backend.
+Hosting: AWS frontend and backend
+        Frontend: S3, cloudfront, route 53
+        Backend: Elastic beanstalk, cloudfront, route 53
 Testing: Jest for backend Vitest for frontend
