@@ -18,7 +18,7 @@ const app = express();
 app.use(cors({
   origin: `${process.env.FRONT_URL}`, // Frontend URL
   credentials: true, // Allow credentials (cookies) to be sent
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
 app.use(express.json({
