@@ -80,10 +80,10 @@ app.use(
         }),
     proxy: isProduction, // trust proxy only in production
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-      httpOnly: true,
-      secure: isProduction, // secure cookies only in production
-      sameSite: isProduction ? 'none' : 'lax',
+        secure: true,
+        sameSite: "none",
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
